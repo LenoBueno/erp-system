@@ -1,6 +1,6 @@
 -- Criação do banco de dados
-CREATE DATABASE IF NOT EXISTS simple_ink_umbanda;
-USE simple_ink_umbanda;
+CREATE DATABASE IF NOT EXISTS erp_system;
+USE erp_system;
 
 -- Tabela de usuários
 CREATE TABLE IF NOT EXISTS users (

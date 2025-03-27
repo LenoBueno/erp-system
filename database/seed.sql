@@ -1,5 +1,5 @@
 -- Inserir dados iniciais
-USE simple_ink_umbandae;
+USE erp_system;
 
 -- Inserir usuário administrador (senha: admin123)
 INSERT INTO users (name, email, password, role) VALUES 

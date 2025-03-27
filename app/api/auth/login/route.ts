@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     })
 
     // Adicionar o cookie JWT manualmente no cabeçalho 'Set-Cookie'
-    res.headers.set('Set-Cookie', `auth_token=${token}; Path=/; HttpOnly; Max-Age=${60 * 60 * 8}; SameSite=Strict; Secure=${env.NODE_ENV === "production"}`);
+    res.headers.set('Set-Cookie', `auth_token=${token}; Path=/; HttpOnly; Max-Age=${60 * 60 * 8}; SameSite=strict; Secure=${env.NODE_ENV === "production"}`);
 
     return res
 
