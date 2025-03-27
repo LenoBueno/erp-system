@@ -12,13 +12,13 @@ export interface User {
 
 // Interface para resultados de consultas SQL
 export interface QueryResult<T = any> {
-  [index: number]: T;
-  length: number;
+  rows: T[];  // Agora será um array de resultados, mais explícito
+  rowCount: number; // Propriedade para indicar o número de linhas retornadas
 }
 
 // Interface para conexão de banco de dados
 export interface DbConnection {
-  execute: (sql: string, params?: any[]) => Promise<[any[], any]>;
+  execute: (sql: string, params?: any[]) => Promise<[any[], any]>;  // Resultado da consulta: [rows, fields]
   beginTransaction: () => Promise<void>;
   commit: () => Promise<void>;
   rollback: () => Promise<void>;
@@ -27,6 +27,6 @@ export interface DbConnection {
 
 // Interface para o pool de conexões
 export interface DbPool {
-  execute: (sql: string, params?: any[]) => Promise<[any[], any]>;
+  execute: (sql: string, params?: any[]) => Promise<[any[], any]>;  // Resultado da consulta: [rows, fields]
   getConnection: () => Promise<DbConnection>;
 }

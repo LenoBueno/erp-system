@@ -16,10 +16,10 @@ const pool = mysql.createPool({
 
 // Função para executar queries
 export const db = {
-  query: async <T = any>(sql: string, params?: any[]): Promise<QueryResult<T>> => {
+  query: async <T = any>(sql: string, params?: any[]): Promise<T[]> => {  // Ajuste da tipagem para um array de resultados
     try {
       const [rows] = await pool.execute(sql, params)
-      return rows as QueryResult<T>
+      return rows as T[]  // Agora retorna um array do tipo T
     } catch (error) {
       console.error("Erro na execução da query:", error)
       throw error
@@ -42,4 +42,3 @@ export const db = {
     }
   },
 }
-

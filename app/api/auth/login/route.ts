@@ -1,66 +1,60 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import { db } from "@/lib/db"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import { User, QueryResult } from "@/lib/types"
+import { User } from "@/lib/types"
 import { env } from "@/lib/env"
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json()
 
-    // Validar dados
+    // Validar dados de entrada
     if (!email || !password) {
       return NextResponse.json({ message: "Email e senha são obrigatórios" }, { status: 400 })
     }
 
-    // Buscar usuário
-    const user = await db.query<User>("SELECT * FROM users WHERE email = ?", [email])
+    // Buscar usuário no banco de dados
+    const result = await db.query<User>("SELECT * FROM users WHERE email = ?", [email])
 
-    if (!user || user.length === 0) {
+    // Verificar se o usuário existe
+    if (result.length === 0) {
       return NextResponse.json({ message: "Credenciais inválidas" }, { status: 401 })
     }
 
-    // Verificar senha
-    const passwordMatch = await bcrypt.compare(password, user[0].password)
+    // Verificar se a senha fornecida corresponde à senha criptografada no banco
+    const user = result[0]
+    const passwordMatch = await bcrypt.compare(password, user.password)
+
     if (!passwordMatch) {
       return NextResponse.json({ message: "Credenciais inválidas" }, { status: 401 })
     }
 
-    // Gerar token JWT
+    // Gerar o token JWT
     const token = jwt.sign(
       {
-        id: user[0].id,
-        email: user[0].email,
-        name: user[0].name,
-        role: user[0].role,
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
       },
-      env.JWT_SECRET,
-      { expiresIn: "8h" },
+      env.JWT_SECRET,  // Certifique-se de que a chave secreta está definida corretamente
+      { expiresIn: "8h" }
     )
 
-    // Salvar token em cookie
-    await cookies().set({
-      name: "auth_token",
-      value: token,
-      httpOnly: true,
-      path: "/",
-      secure: env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 8, // 8 horas
-    })
-
-    // Retornar dados do usuário (sem a senha)
-    const { password: _, ...userData } = user[0]
-
-    return NextResponse.json({
+    // Criar a resposta JSON
+    const res = NextResponse.json({
       message: "Login realizado com sucesso",
-      user: userData,
+      user: { ...user, password: undefined }, // Remove a senha antes de retornar os dados do usuário
     })
+
+    // Adicionar o cookie JWT manualmente no cabeçalho 'Set-Cookie'
+    res.headers.set('Set-Cookie', `auth_token=${token}; Path=/; HttpOnly; Max-Age=${60 * 60 * 8}; SameSite=Strict; Secure=${env.NODE_ENV === "production"}`);
+
+    return res
+
   } catch (error) {
     console.error("Erro ao fazer login:", error)
-    console.error("Detalhes do erro:", JSON.stringify(error, null, 2))
     return NextResponse.json({ message: "Erro interno do servidor" }, { status: 500 })
   }
 }
-
