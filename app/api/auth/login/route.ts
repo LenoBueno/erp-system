@@ -3,6 +3,8 @@ import { cookies } from "next/headers"
 import { db } from "@/lib/db"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import { User, QueryResult } from "@/lib/types"
+import { env } from "@/lib/env"
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     // Buscar usuário
-    const user = await db.query("SELECT * FROM users WHERE email = ?", [email])
+    const user = await db.query<User>("SELECT * FROM users WHERE email = ?", [email])
 
     if (!user || user.length === 0) {
       return NextResponse.json({ message: "Credenciais inválidas" }, { status: 401 })
@@ -34,17 +36,17 @@ export async function POST(request: Request) {
         name: user[0].name,
         role: user[0].role,
       },
-      process.env.JWT_SECRET || "secret",
+      env.JWT_SECRET,
       { expiresIn: "8h" },
     )
 
     // Salvar token em cookie
-    cookies().set({
+    await cookies().set({
       name: "auth_token",
       value: token,
       httpOnly: true,
       path: "/",
-      secure: process.env.NODE_ENV === "production",
+      secure: env.NODE_ENV === "production",
       maxAge: 60 * 60 * 8, // 8 horas
     })
 

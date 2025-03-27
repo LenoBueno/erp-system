@@ -1,23 +1,25 @@
 import mysql from "mysql2/promise"
+import { DbConnection, DbPool, QueryResult } from "./types"
+import { env } from "./env"
 
 // Configuração do pool de conexões
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "root",
-  database: process.env.DB_NAME || "simple_ink_umbanda",
+  host: env.DB_HOST,
+  port: env.DB_PORT,
+  user: env.DB_USER,
+  password: env.DB_PASSWORD,
+  database: env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-})
+}) as DbPool
 
 // Função para executar queries
 export const db = {
-  query: async (sql, params) => {
+  query: async <T = any>(sql: string, params?: any[]): Promise<QueryResult<T>> => {
     try {
       const [rows] = await pool.execute(sql, params)
-      return rows
+      return rows as QueryResult<T>
     } catch (error) {
       console.error("Erro na execução da query:", error)
       throw error
@@ -25,7 +27,7 @@ export const db = {
   },
 
   // Função para transações
-  transaction: async (callback) => {
+  transaction: async <T>(callback: (connection: DbConnection) => Promise<T>): Promise<T> => {
     const connection = await pool.getConnection()
     try {
       await connection.beginTransaction()

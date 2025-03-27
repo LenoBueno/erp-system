@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import jwt from "jsonwebtoken"
+import { User } from "@/lib/types"
 
 export async function GET() {
   try {
     // Verificar se o token existe
-    const token = cookies().get("auth_token")?.value
+    const token = await cookies().get("auth_token")?.value
 
     if (!token) {
       return NextResponse.json({ message: "Não autenticado" }, { status: 401 })
@@ -19,7 +20,7 @@ export async function GET() {
         user: decoded,
       })
     } catch (error) {
-      cookies().delete("auth_token")
+      await cookies().delete("auth_token")
       return NextResponse.json({ message: "Token inválido ou expirado" }, { status: 401 })
     }
   } catch (error) {
