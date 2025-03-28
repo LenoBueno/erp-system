@@ -5,7 +5,7 @@ export async function POST() {
   try {
     // Remover cookie de autenticação
     const cookieStore = cookies()
-    cookieStore.delete("auth_token")
+    await cookieStore.delete("auth_token")
 
     return NextResponse.json({
       message: "Logout realizado com sucesso",

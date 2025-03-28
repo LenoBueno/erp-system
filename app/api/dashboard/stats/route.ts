@@ -218,7 +218,32 @@ export async function GET(request: Request) {
       monthlySales: monthlySalesResult || [],
     }
 
-    return NextResponse.json(stats)
+    return NextResponse.json({ stats })
+    } catch (dbError) {
+      // Tratar erro específico de tabela inexistente
+      if (dbError.code === 'ER_NO_SUCH_TABLE') {
+        console.warn("Tabela 'orders' não existe. Retornando dados simulados.")
+        // Retornar dados simulados temporários
+        return NextResponse.json({
+          stats: {
+            totalSales: 0,
+            totalCustomers: 0,
+            totalOrders: 0,
+            totalProducts: 0,
+            salesGrowth: 0,
+            customersGrowth: 0,
+            ordersGrowth: 0,
+            productsGrowth: 0,
+            recentSales: [],
+            productCategories: [],
+            monthlySales: [],
+          }
+        })
+      } else {
+        // Repassar o erro para ser tratado pelo catch externo
+        throw dbError
+      }
+    }
   } catch (error) {
     console.error("Erro ao obter estatísticas do dashboard:", error)
     return NextResponse.json({ message: "Erro interno do servidor" }, { status: 500 })

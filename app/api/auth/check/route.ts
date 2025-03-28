@@ -34,7 +34,7 @@ export async function GET() {
     if (error instanceof jwt.JsonWebTokenError || error instanceof jwt.TokenExpiredError) {
       // Se o token for inválido ou expirado, deletar o cookie
       const cookieStore = cookies() // Chama cookies() novamente para manipular o cookie
-      cookieStore.delete("auth_token") // Deleta o cookie de autenticação
+      await cookieStore.delete("auth_token") // Deleta o cookie de autenticação
       return NextResponse.json({ message: "Token inválido ou expirado" }, { status: 401 })
     }
 

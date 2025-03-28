@@ -12,7 +12,7 @@ export async function GET() {
 
     // Buscar notificações do usuário
     const notifications = await db.query(
-      `SELECT id, message, read, created_at 
+      `SELECT id, message, \`read\`, created_at 
        FROM notifications 
        WHERE user_id = ? 
        ORDER BY created_at DESC
