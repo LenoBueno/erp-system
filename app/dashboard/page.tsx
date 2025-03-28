@@ -4,7 +4,9 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MainLayout } from "@/components/layout/main-layout"
 import { BarChart, LineChart, PieChart } from "@/components/charts"
-import { DollarSign, Users, ShoppingBag, Package, ArrowUp, ArrowDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { DollarSign, Users, ShoppingBag, Package, ArrowUp, ArrowDown, AlertCircle, Bell, FileText } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface DashboardStats {
@@ -195,7 +197,162 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          {/* Alertas */}
+          <Card className="border-l-4 border-l-yellow-500">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-yellow-500" />
+                Alertas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-medium mb-2">Estoque Mínimo</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4 text-yellow-600" />
+                        <span>Notebook Dell Inspiron 15</span>
+                      </div>
+                      <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500">
+                        Estoque: 2
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded-md">
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4 text-red-600" />
+                        <span>Teclado Mecânico Logitech</span>
+                      </div>
+                      <Badge variant="outline" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-500">
+                        Estoque: 0
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4 text-yellow-600" />
+                        <span>Monitor Dell 24"</span>
+                      </div>
+                      <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500">
+                        Estoque: 3
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-medium mb-2">Faturas Vencidas</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded-md">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-red-600" />
+                          <span>Fatura #2023-156</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground ml-6">Empresa ABC Ltda</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">R$ 7.500,00</div>
+                        <div className="text-sm text-red-600">Vencida há 15 dias</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded-md">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-red-600" />
+                          <span>Fatura #2023-142</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground ml-6">Indústria 123</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">R$ 4.200,00</div>
+                        <div className="text-sm text-red-600">Vencida há 8 dias</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <Button variant="outline" className="w-full">Ver todos os alertas</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Notificações */}
+          <Card className="border-l-4 border-l-blue-500">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5 text-blue-500" />
+                Notificações
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-medium mb-2">Pedidos Recentes</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <ShoppingBag className="h-4 w-4 text-blue-600" />
+                          <span>Pedido #2023-089</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground ml-6">Distribuidora JKL</div>
+                      </div>
+                      <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500">
+                        Concluído
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <ShoppingBag className="h-4 w-4 text-blue-600" />
+                          <span>Pedido #2023-090</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground ml-6">Comércio XYZ S.A.</div>
+                      </div>
+                      <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-500">
+                        Em Processamento
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-medium mb-2">Notas Fiscais</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-blue-600" />
+                          <span>NF-e #1234</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground ml-6">Empresa ABC Ltda</div>
+                      </div>
+                      <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500">
+                        Emitida
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-blue-600" />
+                          <span>NF-e #1235</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground ml-6">Serviços Tech</div>
+                      </div>
+                      <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500">
+                        Pendente
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <Button variant="outline" className="w-full">Ver todas as notificações</Button>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Vendas Mensais</CardTitle>

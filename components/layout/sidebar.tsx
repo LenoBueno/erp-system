@@ -149,6 +149,7 @@ export function Sidebar() {
         { title: "Contas a Receber", path: "/financeiro/contas-receber" },
         { title: "Contas a Pagar", path: "/financeiro/contas-pagar" },
         { title: "Fluxo de Caixa", path: "/financeiro/fluxo-caixa" },
+        { title: "Nota Fiscal Eletrônica", path: "/financeiro/nota-fiscal" },
       ],
     },
     {
