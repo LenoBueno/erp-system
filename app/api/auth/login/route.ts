@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server"
+import bcrypt from 'bcrypt'
 import { db } from "@/lib/db"
-import bcrypt from "bcrypt"
+import { NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
-import { User } from "@/lib/types"
 import { env } from "@/lib/env"
 
 export async function POST(request: Request) {
   try {
+    // Pegar email e senha do corpo da requisição
     const { email, password } = await request.json()
 
     // Validar dados de entrada
@@ -15,17 +15,42 @@ export async function POST(request: Request) {
     }
 
     // Buscar usuário no banco de dados
-    const result = await db.query<User>("SELECT * FROM users WHERE email = ?", [email])
+    const result = await db.query("SELECT * FROM users WHERE email = ?", [email])
 
-    // Verificar se o usuário existe
-    if (result.length === 0) {
+    // Verificar o resultado da consulta
+    console.log("Resultado da consulta:", result)
+
+    // Verificar se o usuário existe (acessando o primeiro elemento do array)
+    if (!result[0] || result[0].length === 0) {
       return NextResponse.json({ message: "Credenciais inválidas" }, { status: 401 })
     }
 
-    // Verificar se a senha fornecida corresponde à senha criptografada no banco
-    const user = result[0]
-    const passwordMatch = await bcrypt.compare(password, user.password)
+    // Obter o usuário encontrado (acessando o primeiro elemento do array)
+    const user = result[0][0]
 
+    // Log para verificar o usuário encontrado
+    console.log("Usuário encontrado:", user)
+
+    // Verificar a senha
+    let passwordMatch = false;
+
+    if (user && user.password) {
+      // Verificar se a senha começa com $2b$ ou $2a$ (formato bcrypt)
+      if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
+        // A senha está criptografada com bcrypt
+        passwordMatch = await bcrypt.compare(password, user.password)
+      } else {
+        // A senha não está criptografada, comparando diretamente
+        passwordMatch = password === user.password
+      }
+    }
+
+    // Log para verificar as senhas e o resultado da comparação
+    console.log("Senha fornecida:", password)
+    console.log("Senha do banco:", user.password)
+    console.log("Senha corresponde:", passwordMatch)
+
+    // Se a senha não corresponder, retorna erro 401
     if (!passwordMatch) {
       return NextResponse.json({ message: "Credenciais inválidas" }, { status: 401 })
     }
@@ -38,7 +63,7 @@ export async function POST(request: Request) {
         name: user.name,
         role: user.role,
       },
-      env.JWT_SECRET,  // Certifique-se de que a chave secreta está definida corretamente
+      env.JWT_SECRET,  // Certifique-se de que a chave secreta está definida corretamente no seu .env
       { expiresIn: "8h" }
     )
 
@@ -49,12 +74,13 @@ export async function POST(request: Request) {
     })
 
     // Adicionar o cookie JWT manualmente no cabeçalho 'Set-Cookie'
-    res.headers.set('Set-Cookie', `auth_token=${token}; Path=/; HttpOnly; Max-Age=${60 * 60 * 8}; SameSite=strict; Secure=${env.NODE_ENV === "production"}`);
+    res.headers.set('Set-Cookie', `auth_token=${token}; Path=/; HttpOnly; Max-Age=${60 * 60 * 8}; SameSite=Strict; Secure=${env.NODE_ENV === "production"}`)
 
     return res
 
   } catch (error) {
+    // Melhor tratamento de erro
     console.error("Erro ao fazer login:", error)
-    return NextResponse.json({ message: "Erro interno do servidor" }, { status: 500 })
+    return NextResponse.json({ message: "Erro interno do servidor", error: (error instanceof Error) ? error.message : "Desconhecido" }, { status: 500 })
   }
 }
