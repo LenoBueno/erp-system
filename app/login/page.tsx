@@ -57,7 +57,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Simple Ink ERP</CardTitle>
+          <CardTitle className="text-2xl text-center">2103 C R E A T I V E</CardTitle>
           <CardDescription className="text-center">Entre com suas credenciais para acessar o sistema</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>

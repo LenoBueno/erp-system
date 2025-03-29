@@ -1,4 +1,4 @@
-\"use client"
+"use client"
 
 import { useState, useEffect } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
-import { Search, Plus, Trash2, ShoppingCart, CreditCard, Printer, DollarSign, Percent, BarcodeScan } from "lucide-react"
+import { Search, Plus, Trash2, ShoppingCart, CreditCard, Printer, DollarSign, Percent, ScanBarcode, Barcode } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface Product {
@@ -36,6 +36,7 @@ interface PaymentMethod {
 }
 
 export default function PDVPage() {
+  const [isClient, setIsClient] = useState(false)
   const [products, setProducts] = useState<Product[]>([
     { id: 1, name: "Notebook Dell Inspiron 15", price: 4500, stock_quantity: 10, barcode: "7891234567890" },
     { id: 2, name: "Monitor Dell 24\"", price: 1200, stock_quantity: 15, barcode: "7891234567891" },
@@ -53,18 +54,29 @@ export default function PDVPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [productQuantity, setProductQuantity] = useState("1")
   const [productDiscount, setProductDiscount] = useState("0")
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
-    { id: "cash", name: "Dinheiro", icon: <DollarSign className="h-5 w-5" /> },
-    { id: "credit", name: "Cartão de Crédito", icon: <CreditCard className="h-5 w-5" /> },
-    { id: "debit", name: "Cartão de Débito", icon: <CreditCard className="h-5 w-5" /> },
-    { id: "pix", name: "PIX", icon: <DollarSign className="h-5 w-5" /> },
-  ])
   const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<{id: string, amount: string}[]>([])
   const [customerName, setCustomerName] = useState("")
   const [customerDocument, setCustomerDocument] = useState("")
   const [saleNote, setSaleNote] = useState("")
   const [cashierBalance, setCashierBalance] = useState(1500)
+  const [paymentMethods] = useState<PaymentMethod[]>([
+    { id: "cash", name: "Dinheiro", icon: <DollarSign className="h-5 w-5" /> },
+    { id: "credit", name: "Cartão de Crédito", icon: <CreditCard className="h-5 w-5" /> },
+    { id: "debit", name: "Cartão de Débito", icon: <CreditCard className="h-5 w-5" /> },
+    { id: "pix", name: "PIX", icon: <DollarSign className="h-5 w-5" /> },
+  ])
   const { toast } = useToast()
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Evita renderização durante SSR
+  if (!isClient) {
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-pulse">Carregando...</div>
+    </div>
+  }
 
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -359,7 +371,7 @@ export default function PDVPage() {
                   <TabsContent value="codigo" className="space-y-4 mt-4">
                     <div className="flex gap-2">
                       <div className="relative flex-1">
-                        <BarcodeScan className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                        <Barcode className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                         <Input
                           placeholder="Digite ou escaneie o código de barras"
                           className="pl-10"
@@ -372,7 +384,7 @@ export default function PDVPage() {
                     </div>
                     <div className="flex items-center justify-center h-64 border rounded-md border-dashed">
                       <div className="text-center">
-                        <BarcodeScan className="h-12 w-12 mx-auto text-muted-foreground" />
+                        <Barcode className="h-12 w-12 mx-auto text-muted-foreground" />
                         <p className="mt-2 text-muted-foreground">Digite o código de barras ou use um leitor</p>
                       </div>
                     </div>
@@ -681,4 +693,62 @@ export default function PDVPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Produto</TableHead>
-                    <TableHead className="text-right
+                    <TableHead className="text-right">Qtd</TableHead>
+                    <TableHead className="text-right">Valor</TableHead>
+                    <TableHead className="text-right">Subtotal</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {cartItems.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell className="text-right">{item.quantity}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(item.subtotal)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="border-t pt-4 space-y-2">
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span>{formatCurrency(getCartTotal())}</span>
+              </div>
+              {selectedPaymentMethods.map((method, index) => {
+                const paymentMethod = paymentMethods.find(pm => pm.id === method.id);
+                return (
+                  <div key={index} className="flex justify-between text-sm">
+                    <span>{paymentMethod?.name}:</span>
+                    <span>{formatCurrency(parseFloat(method.amount) || 0)}</span>
+                  </div>
+                );
+              })}
+              {getChange() > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Troco:</span>
+                  <span>{formatCurrency(getChange())}</span>
+                </div>
+              )}
+            </div>
+
+            {saleNote && (
+              <div className="border-t pt-4 mt-4">
+                <p className="text-sm"><strong>Observações:</strong></p>
+                <p className="text-sm">{saleNote}</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handlePrintReceipt} className="flex items-center gap-2">
+              <Printer className="h-4 w-4" />
+              Imprimir
+            </Button>
+            <Button onClick={handleNewSale}>Nova Venda</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </MainLayout>
+  )
+}

@@ -1,4 +1,4 @@
-\"use client"
+"use client"
 
 import { useState } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
@@ -117,4 +117,13 @@ export default function FornecedoresPage() {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
-                <PlusCircle className="h-4 w-4
+                <PlusCircle className="h-4 w-4" />
+                Adicionar Fornecedor
+              </Button>
+            </DialogTrigger>
+          </Dialog>
+        </div>
+      </div>
+    </MainLayout>
+  )
+}

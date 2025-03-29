@@ -1,4 +1,4 @@
-\"use client"
+"use client"
 
 import { useState } from "react"
 import { MainLayout } from "@/components/layout/main-layout"

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bell, User, Search } from "lucide-react"
+import { Bell, User, Search, Settings, Sun, Moon, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+import { useTheme } from "@/hooks/use-theme"
 
 interface Notification {
   id: number
@@ -28,6 +29,7 @@ export function Header() {
   const [userName, setUserName] = useState("")
   const router = useRouter()
   const { toast } = useToast()
+  const { isDarkMode, toggleTheme } = useTheme()
 
   useEffect(() => {
     // Carregar notificações do usuário
@@ -104,8 +106,8 @@ export function Header() {
   }
 
   return (
-    <header className="h-16 border-b bg-card flex items-center justify-between px-6">
-      <div className="flex items-center w-1/3">
+    <header className="h-16 bg-card flex items-center justify-between px-6">
+      <div className="flex items-center w-full">
         <div className="relative w-full max-w-md">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input type="search" placeholder="Buscar..." className="pl-8 w-full" />
@@ -113,6 +115,24 @@ export function Header() {
       </div>
 
       <div className="flex items-center space-x-4">
+        {/* Usuário */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <User className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>{userName || "Usuário"}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => router.push("/configuracoes/perfil")}>Meu Perfil</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/configuracoes")}>Configurações</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout}>Sair</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Notificações */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
@@ -146,21 +166,38 @@ export function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Configurações */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
+              <Settings className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{userName || "Usuário"}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push("/configuracoes/perfil")}>Meu Perfil</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/configuracoes")}>Configurações</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>Sair</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/configuracoes/perfil")}>Perfil</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/configuracoes/empresa")}>Empresa</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/configuracoes/usuarios")}>Usuários</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Modo (Claro/Escuro) */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => {
+            toggleTheme();
+          }}
+        >
+          {isDarkMode ? 
+            <Sun className="h-5 w-5" /> : 
+            <Moon className="h-5 w-5" />
+          }
+        </Button>
+
+        {/* Sair */}
+        <Button variant="ghost" size="icon" onClick={handleLogout}>
+          <LogOut className="h-5 w-5" />
+        </Button>
       </div>
     </header>
   )

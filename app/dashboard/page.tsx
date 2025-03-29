@@ -30,6 +30,23 @@ interface DashboardStats {
     month: string
     sales: number
   }[]
+  lowStockProducts: {
+    id: number
+    name: string
+    stock: number
+    minStock: number
+  }[]
+  paymentStatus: {
+    status: string
+    count: number
+    amount: number
+  }[]
+  topCustomers: {
+    id: number
+    name: string
+    totalOrders: number
+    totalSpent: number
+  }[]
 }
 
 export default function DashboardPage() {
@@ -198,6 +215,111 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          {/* Gráfico de Vendas Mensais */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Vendas Mensais</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <LineChart
+                data={stats.monthlySales.map((item) => item.sales)}
+                labels={stats.monthlySales.map((item) => item.month)}
+                label="Vendas"
+              />
+            </CardContent>
+          </Card>
+
+          {/* Gráfico de Categorias de Produtos */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Produtos por Categoria</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PieChart
+                data={stats.productCategories.map((item) => item.count)}
+                labels={stats.productCategories.map((item) => item.category)}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Produtos com Estoque Baixo */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-yellow-500" />
+                Produtos com Estoque Baixo
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {stats.lowStockProducts.map((product) => (
+                  <div key={product.id} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{product.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Estoque: {product.stock} | Mínimo: {product.minStock}
+                      </p>
+                    </div>
+                    <Badge variant={product.stock <= product.minStock ? "destructive" : "warning"}>
+                      {product.stock <= product.minStock ? "Crítico" : "Baixo"}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Status de Pagamentos */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-500" />
+                Status de Pagamentos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {stats.paymentStatus.map((status, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{status.status}</p>
+                      <p className="text-sm text-muted-foreground">{status.count} pagamentos</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(status.amount)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Top Clientes */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-green-500" />
+                Clientes Mais Ativos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {stats.topCustomers.map((customer) => (
+                  <Card key={customer.id}>
+                    <CardContent className="p-4">
+                      <div className="space-y-2">
+                        <p className="font-medium">{customer.name}</p>
+                        <div className="text-sm text-muted-foreground">
+                          <p>Total de Pedidos: {customer.totalOrders}</p>
+                          <p>Total Gasto: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(customer.totalSpent)}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
           {/* Alertas */}
           <Card className="border-l-4 border-l-yellow-500">
             <CardHeader>
