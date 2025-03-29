@@ -1,4 +1,4 @@
-\"use client"
+"use client"
 
 import { useState } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
@@ -425,3 +425,159 @@ export default function NotaFiscalPage() {
                     <TableBody>
                       {getNotasFiscaisFiltradas().map((nf) => (
                         <TableRow key={nf.id}>
+                          <TableCell className="font-medium">{nf.numero}</TableCell>
+                          <TableCell>{nf.cliente}</TableCell>
+                          <TableCell>{formatDate(nf.data_emissao)}</TableCell>
+                          <TableCell>{formatCurrency(nf.valor)}</TableCell>
+                          <TableCell>{getStatusBadge(nf.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleVisualizarNota(nf)}
+                                title="Visualizar"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              {nf.status === "emitida" && (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleDownloadXML(nf)}
+                                    title="Download XML"
+                                  >
+                                    <FileText className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleImprimirDANFE(nf)}
+                                    title="Imprimir"
+                                  >
+                                    <Printer className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    Emitidas
+                  </CardTitle>
+                  <CardDescription>
+                    Total de notas emitidas no mês
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    {notasFiscaisNFSe.filter(nf => nf.status === "emitida").length}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                    Pendentes
+                  </CardTitle>
+                  <CardDescription>
+                    Notas aguardando emissão
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    {notasFiscaisNFSe.filter(nf => nf.status === "pendente").length}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <XCircle className="h-5 w-5 text-red-500" />
+                    Canceladas/Rejeitadas
+                  </CardTitle>
+                  <CardDescription>
+                    Notas com problemas no mês
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    {notasFiscaisNFSe.filter(nf => nf.status === "cancelada" || nf.status === "rejeitada").length}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Emitir Nota Fiscal</DialogTitle>
+              <DialogDescription>
+                Preencha os dados para emissão da nota fiscal
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="cliente" className="text-right">
+                  Cliente
+                </Label>
+                <Input id="cliente" className="col-span-3" />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="valor" className="text-right">
+                  Valor
+                </Label>
+                <Input id="valor" className="col-span-3" type="number" />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="tipo" className="text-right">
+                  Tipo
+                </Label>
+                <Select defaultValue={activeTab}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nfe">NF-e (Produtos)</SelectItem>
+                    <SelectItem value="nfse">NFS-e (Serviços)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={() => {
+                toast({
+                  title: "Nota fiscal emitida",
+                  description: "A nota fiscal foi emitida com sucesso!",
+                })
+                setIsDialogOpen(false)
+              }}>
+                Emitir
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </MainLayout>
+  )
+}
