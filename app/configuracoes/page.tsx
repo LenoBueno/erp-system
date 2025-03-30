@@ -1,4 +1,4 @@
-  "use client"
+"use client"
 
 import { useState } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
@@ -194,6 +194,10 @@ export default function ConfiguracoesPage() {
                     <Label htmlFor="inscricao-estadual">Inscrição Estadual</Label>
                     <Input id="inscricao-estadual" defaultValue="123.456.789.000" />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cnae">CNAE Principal</Label>
+                    <Input id="cnae" placeholder="Ex: 4751-2/01" />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -252,60 +256,367 @@ export default function ConfiguracoesPage() {
                 <CardDescription>Configurações para emissão de notas fiscais</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="regime-tributario">Regime Tributário</Label>
-                  <Select defaultValue="simples">
-                    <SelectTrigger id="regime-tributario">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="simples">Simples Nacional</SelectItem>
-                      <SelectItem value="lucro-presumido">Lucro Presumido</SelectItem>
-                      <SelectItem value="lucro-real">Lucro Real</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="certificado-digital">Certificado Digital</Label>
-                  <div className="flex items-center gap-2">
-                    <Input id="certificado-digital" type="file" className="hidden" />
-                    <Button variant="outline" className="w-full justify-start" onClick={() => document.getElementById('certificado-digital')?.click()}>
-                      Selecionar certificado A1
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <Trash className="h-4 w-4" />
-                    </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="regime-tributario">Regime Tributário</Label>
+                    <Select defaultValue="simples">
+                      <SelectTrigger id="regime-tributario">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="simples">Simples Nacional</SelectItem>
+                        <SelectItem value="lucro-presumido">Lucro Presumido</SelectItem>
+                        <SelectItem value="lucro-real">Lucro Real</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Nenhum certificado selecionado</p>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="codigo-beneficio-fiscal">Código de Benefício Fiscal (ICMS-ST)</Label>
+                    <Input id="codigo-beneficio-fiscal" placeholder="Ex: RS12345678" />
+                    <p className="text-xs text-muted-foreground">Definido conforme incentivo fiscal estadual</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="cfop-interno">CFOP para Operações Internas</Label>
+                    <Input id="cfop-interno" placeholder="Ex: 5102" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="cfop-interestadual">CFOP para Operações Interestaduais</Label>
+                    <Input id="cfop-interestadual" placeholder="Ex: 6102" />
+                  </div>
+                </div>
+                
+                <div className="pt-2 border-t">
+                  <h3 className="text-lg font-medium mb-4">Configurações de Alíquotas</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="aliquota-icms-interna">Alíquota ICMS Interna</Label>
+                      <div className="flex items-center gap-2">
+                        <Input id="aliquota-icms-interna" placeholder="Ex: 17.5" />
+                        <span className="text-sm">%</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Alíquota para operações dentro do estado</p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="aliquota-icms-interestadual">Alíquota ICMS Interestadual</Label>
+                      <div className="flex items-center gap-2">
+                        <Input id="aliquota-icms-interestadual" placeholder="Ex: 12" />
+                        <span className="text-sm">%</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Alíquota para operações fora do estado</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <Label>Alíquotas PIS/COFINS (Simples Nacional)</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="aliquota-pis">Alíquota PIS</Label>
+                        <div className="flex items-center gap-2">
+                          <Input id="aliquota-pis" defaultValue="0.65" />
+                          <span className="text-sm">%</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Valor fixo para Simples Nacional</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="aliquota-cofins">Alíquota COFINS</Label>
+                        <div className="flex items-center gap-2">
+                          <Input id="aliquota-cofins" defaultValue="3.0" />
+                          <span className="text-sm">%</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Valor fixo para Simples Nacional</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <Label>Alíquotas ICMS por Estado de Destino</Label>
+                      <Button variant="outline" size="sm" className="flex items-center gap-1">
+                        <PlusCircle className="h-3 w-3" />
+                        Adicionar Estado
+                      </Button>
+                    </div>
+                    <div className="border rounded-md">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Estado</TableHead>
+                            <TableHead>Alíquota (%)</TableHead>
+                            <TableHead className="w-[100px]">Ações</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>
+                              <Select defaultValue="RS">
+                                <SelectTrigger id="estado-destino-1">
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="RS">Rio Grande do Sul</SelectItem>
+                                  <SelectItem value="SC">Santa Catarina</SelectItem>
+                                  <SelectItem value="PR">Paraná</SelectItem>
+                                  <SelectItem value="SP">São Paulo</SelectItem>
+                                  <SelectItem value="RJ">Rio de Janeiro</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Input defaultValue="17.5" />
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="icon">
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <Select defaultValue="SP">
+                                <SelectTrigger id="estado-destino-2">
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="RS">Rio Grande do Sul</SelectItem>
+                                  <SelectItem value="SC">Santa Catarina</SelectItem>
+                                  <SelectItem value="PR">Paraná</SelectItem>
+                                  <SelectItem value="SP">São Paulo</SelectItem>
+                                  <SelectItem value="RJ">Rio de Janeiro</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Input defaultValue="12.0" />
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="icon">
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Configure alíquotas específicas por estado de destino</p>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="senha-certificado">Senha do Certificado</Label>
-                  <Input id="senha-certificado" type="password" />
+                <div className="pt-2 border-t">
+                  <h3 className="text-lg font-medium mb-4">Diferencial de Alíquotas (DIFAL)</h3>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Calcular DIFAL automaticamente</Label>
+                        <p className="text-sm text-muted-foreground">Calcular diferencial de alíquotas para vendas interestaduais</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <Label htmlFor="percentual-partilha">Percentual de Partilha DIFAL</Label>
+                    <div className="flex items-center gap-2">
+                      <Input id="percentual-partilha" defaultValue="100" />
+                      <span className="text-sm">%</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Percentual destinado ao estado de destino</p>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Informações do Simples Nacional</Label>
+                        <p className="text-sm text-muted-foreground">Seu regime tributário é Simples Nacional</p>
+                      </div>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-md mt-2">
+                      <p className="text-sm">No Simples Nacional, as alíquotas de PIS (0,65%) e COFINS (3,0%) são fixas e já estão incluídas na alíquota única do regime. Os valores configurados aqui serão utilizados apenas para fins de demonstração nos documentos fiscais.</p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="serie-nfe">Série NFe</Label>
-                  <Input id="serie-nfe" defaultValue="1" />
-                </div>
+                <div className="pt-2 border-t">
+                  <h3 className="text-lg font-medium mb-4">Certificado Digital e SEFAZ-RS</h3>
+                  
+                  <div className="space-y-2 mb-4">
+                    <Label htmlFor="tipo-certificado">Tipo de Certificado</Label>
+                    <Select defaultValue="a1">
+                      <SelectTrigger id="tipo-certificado">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="a1">Certificado A1</SelectItem>
+                        <SelectItem value="a3">Certificado A3</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2 mb-4">
+                    <Label htmlFor="url-webservice">URL Webservice SEFAZ-RS</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Select defaultValue="producao">
+                        <SelectTrigger id="ambiente-webservice">
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="producao">Produção</SelectItem>
+                          <SelectItem value="homologacao">Homologação</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input id="url-webservice" defaultValue="https://nfe.sefazrs.rs.gov.br/ws/NfeAutorizacao/NFeAutorizacao4.asmx" />
+                    </div>
+                    <div className="flex justify-end mt-2">
+                      <Button variant="outline" className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Testar Conexão com SEFAZ
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="certificado-digital">Certificado Digital</Label>
+                    <div className="flex items-center gap-2">
+                      <Input id="certificado-digital" type="file" className="hidden" />
+                      <Button variant="outline" className="w-full justify-start" onClick={() => document.getElementById('certificado-digital')?.click()}>
+                        Selecionar certificado
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Nenhum certificado selecionado</p>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="proxima-nfe">Próxima NFe</Label>
-                  <Input id="proxima-nfe" defaultValue="123" />
-                </div>
+                  <div className="space-y-2 mt-4">
+                    <Label htmlFor="senha-certificado">Senha do Certificado</Label>
+                    <Input id="senha-certificado" type="password" />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="serie-nfe">Série NFe</Label>
+                      <Input id="serie-nfe" defaultValue="1" />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="ambiente">Ambiente</Label>
-                  <Select defaultValue="homologacao">
-                    <SelectTrigger id="ambiente">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="homologacao">Homologação</SelectItem>
-                      <SelectItem value="producao">Produção</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <div className="space-y-2">
+                      <Label htmlFor="proxima-nfe">Próxima NFe</Label>
+                      <Input id="proxima-nfe" defaultValue="123" />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="ambiente">Ambiente</Label>
+                      <Select defaultValue="homologacao">
+                        <SelectTrigger id="ambiente">
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="homologacao">Homologação</SelectItem>
+                          <SelectItem value="producao">Produção</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="csc">CSC (Código de Segurança do Contribuinte)</Label>
+                      <Input id="csc" type="password" placeholder="Código para NFC-e" />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-2 border-t">
+                  <h3 className="text-lg font-medium mb-4">Nota Fiscal Gaúcha (NFG)</h3>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Integração com NFG</Label>
+                        <p className="text-sm text-muted-foreground">Ativar integração com o programa Nota Fiscal Gaúcha</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Solicitar CPF do Consumidor</Label>
+                        <p className="text-sm text-muted-foreground">Solicitar CPF do consumidor para registro no programa NFG</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Consulta de Pontuação NFG</Label>
+                        <p className="text-sm text-muted-foreground">Permitir consulta de pontuação acumulada pelo consumidor</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <Label htmlFor="mensagem-nfg">Mensagem NFG</Label>
+                    <Textarea 
+                      id="mensagem-nfg" 
+                      defaultValue="Este documento é válido para a Nota Fiscal Gaúcha" 
+                      placeholder="Mensagem exibida no DANFE" 
+                    />
+                  </div>
+                </div>
+                
+                <div className="pt-2 border-t">
+                  <h3 className="text-lg font-medium mb-4">Configurações de DANFE e Impressão</h3>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="layout-danfe">Layout do DANFE</Label>
+                    <Select defaultValue="padrao">
+                      <SelectTrigger id="layout-danfe">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="padrao">Padrão</SelectItem>
+                        <SelectItem value="simplificado">Simplificado</SelectItem>
+                        <SelectItem value="personalizado">Personalizado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Modo Contingencial (Offline)</Label>
+                        <p className="text-sm text-muted-foreground">Ativar modo de contingência quando SEFAZ estiver indisponível</p>
+                      </div>
+                      <Switch />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Impressão Automática</Label>
+                        <p className="text-sm text-muted-foreground">Imprimir DANFE automaticamente após emissão</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex justify-end">
