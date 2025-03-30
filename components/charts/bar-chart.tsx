@@ -1,15 +1,19 @@
 "use client"
-import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
 import { useTheme } from "next-themes"
 
+interface BarChartData {
+  name: string
+  value: number
+  backgroundColor?: string
+}
+
 interface BarChartProps {
-  data: Array<{ name: string; value: number }>
-  xKey: string
-  yKey: string
+  data: BarChartData[]
   height?: number
 }
 
-export function BarChart({ data, xKey, yKey, height = 400 }: BarChartProps) {
+export function BarChart({ data, height = 400 }: BarChartProps) {
   const { theme } = useTheme()
   const isDark = theme === "dark"
 
@@ -20,12 +24,20 @@ export function BarChart({ data, xKey, yKey, height = 400 }: BarChartProps) {
     }).format(value)
   }
 
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center" style={{ height }}>
+        <p>No data available</p>
+      </div>
+    )
+  }
+
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RechartsBarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#333" : "#eee"} />
         <XAxis
-          dataKey={xKey}
+          dataKey="name"
           tick={{ fill: isDark ? "#ccc" : "#333" }}
           tickLine={{ stroke: isDark ? "#666" : "#ccc" }}
         />
@@ -42,7 +54,11 @@ export function BarChart({ data, xKey, yKey, height = 400 }: BarChartProps) {
             color: isDark ? "#fff" : "#333",
           }}
         />
-        <Bar dataKey={yKey} fill="#8884d8" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="value" fill="#8884d8">
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.backgroundColor || `#${Math.floor(Math.random()*16777215).toString(16)}`} />
+          ))}
+        </Bar>
       </RechartsBarChart>
     </ResponsiveContainer>
   )

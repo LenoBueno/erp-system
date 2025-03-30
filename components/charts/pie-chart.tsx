@@ -2,8 +2,14 @@
 import { PieChart as RechartsPieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts"
 import { useTheme } from "next-themes"
 
+interface PieChartData {
+  name: string
+  value: number
+  backgroundColor?: string
+}
+
 interface PieChartProps {
-  data: Array<{ name: string; value: number }>
+  data: PieChartData[]
   height?: number
 }
 
@@ -11,7 +17,13 @@ export function PieChart({ data, height = 400 }: PieChartProps) {
   const { theme } = useTheme()
   const isDark = theme === "dark"
 
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D", "#FF6B6B", "#6B66FF"]
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center" style={{ height }}>
+        <p>No data available</p>
+      </div>
+    )
+  }
 
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -27,7 +39,7 @@ export function PieChart({ data, height = 400 }: PieChartProps) {
           label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
         >
           {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            <Cell key={`cell-${index}`} fill={entry.backgroundColor || `#${Math.floor(Math.random()*16777215).toString(16)}`} />
           ))}
         </Pie>
         <Tooltip
