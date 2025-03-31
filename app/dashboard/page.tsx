@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MainLayout } from "@/components/layout/main-layout"
-import { BarChart, LineChart, PieChart } from "@/components/charts"
+import { ChartFactory } from "@/components/charts/chart-factory"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { DollarSign, Users, ShoppingBag, Package, ArrowUp, ArrowDown, AlertCircle, Bell, FileText } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { ChartProps } from "@/lib/types"
 
 interface DashboardStats {
   totalSales: number
@@ -216,6 +217,146 @@ export default function DashboardPage() {
           </Card>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle>Vendas Mensais</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartFactory 
+                type="bar"
+                data={{
+                  labels: stats.monthlySales.map(item => item.month),
+                  datasets: [
+                    {
+                      label: "Vendas",
+                      data: stats.monthlySales.map(item => item.sales),
+                      backgroundColor: "rgba(99, 102, 241, 0.7)",
+                      borderColor: "rgb(99, 102, 241)",
+                      borderWidth: 1
+                    }
+                  ]
+                }}
+                options={{
+                  height: 300,
+                  valuePrefix: "R$",
+                  showLegend: false,
+                  showGrid: true
+                }}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle>Status de Pagamento</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartFactory 
+                type="pie"
+                data={{
+                  labels: stats.paymentStatus.map(item => item.status),
+                  datasets: [
+                    {
+                      data: stats.paymentStatus.map(item => item.amount),
+                      backgroundColor: [
+                        "rgba(52, 211, 153, 0.7)",
+                        "rgba(251, 191, 36, 0.7)",
+                        "rgba(239, 68, 68, 0.7)"
+                      ],
+                      borderColor: [
+                        "rgb(52, 211, 153)",
+                        "rgb(251, 191, 36)",
+                        "rgb(239, 68, 68)"
+                      ],
+                      borderWidth: 1
+                    }
+                  ]
+                }}
+                options={{
+                  height: 300,
+                  valuePrefix: "R$",
+                  showLegend: true,
+                  showGrid: false
+                }}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="md:col-span-2 overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle>Vendas Recentes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartFactory 
+                type="line"
+                data={{
+                  labels: stats.recentSales.map(item => item.date),
+                  datasets: [
+                    {
+                      label: "Vendas",
+                      data: stats.recentSales.map(item => item.amount),
+                      backgroundColor: "rgba(99, 102, 241, 0.1)",
+                      borderColor: "rgb(99, 102, 241)",
+                      borderWidth: 2,
+                      tension: 0.3,
+                      fill: true
+                    }
+                  ]
+                }}
+                options={{
+                  height: 300,
+                  valuePrefix: "R$",
+                  showLegend: false,
+                  showGrid: true
+                }}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle>Categorias de Produtos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartFactory 
+                type="pie"
+                data={{
+                  labels: stats.productCategories.map(item => item.category),
+                  datasets: [
+                    {
+                      data: stats.productCategories.map(item => item.count),
+                      backgroundColor: [
+                        "rgba(99, 102, 241, 0.7)",
+                        "rgba(52, 211, 153, 0.7)",
+                        "rgba(251, 191, 36, 0.7)",
+                        "rgba(239, 68, 68, 0.7)",
+                        "rgba(96, 165, 250, 0.7)"
+                      ],
+                      borderColor: [
+                        "rgb(99, 102, 241)",
+                        "rgb(52, 211, 153)",
+                        "rgb(251, 191, 36)",
+                        "rgb(239, 68, 68)",
+                        "rgb(96, 165, 250)"
+                      ],
+                      borderWidth: 1
+                    }
+                  ]
+                }}
+                options={{
+                  height: 300,
+                  valueSuffix: " produtos",
+                  showLegend: true,
+                  showGrid: false
+                }}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           {/* Gráfico de Vendas Mensais */}
           <Card>
@@ -223,10 +364,26 @@ export default function DashboardPage() {
               <CardTitle>Vendas Mensais</CardTitle>
             </CardHeader>
             <CardContent>
-              <LineChart
-                data={stats.monthlySales.map((item) => item.sales)}
-                labels={stats.monthlySales.map((item) => item.month)}
-                label="Vendas"
+              <ChartFactory 
+                type="bar"
+                data={{
+                  labels: stats.monthlySales.map(item => item.month),
+                  datasets: [
+                    {
+                      label: "Vendas",
+                      data: stats.monthlySales.map(item => item.sales),
+                      backgroundColor: "rgba(99, 102, 241, 0.7)",
+                      borderColor: "rgb(99, 102, 241)",
+                      borderWidth: 1
+                    }
+                  ]
+                }}
+                options={{
+                  height: 300,
+                  valuePrefix: "R$",
+                  showLegend: false,
+                  showGrid: true
+                }}
               />
             </CardContent>
           </Card>
@@ -237,9 +394,37 @@ export default function DashboardPage() {
               <CardTitle>Produtos por Categoria</CardTitle>
             </CardHeader>
             <CardContent>
-              <PieChart
-                data={stats.productCategories.map((item) => item.count)}
-                labels={stats.productCategories.map((item) => item.category)}
+              <ChartFactory 
+                type="pie"
+                data={{
+                  labels: stats.productCategories.map(item => item.category),
+                  datasets: [
+                    {
+                      data: stats.productCategories.map(item => item.count),
+                      backgroundColor: [
+                        "rgba(99, 102, 241, 0.7)",
+                        "rgba(52, 211, 153, 0.7)",
+                        "rgba(251, 191, 36, 0.7)",
+                        "rgba(239, 68, 68, 0.7)",
+                        "rgba(96, 165, 250, 0.7)"
+                      ],
+                      borderColor: [
+                        "rgb(99, 102, 241)",
+                        "rgb(52, 211, 153)",
+                        "rgb(251, 191, 36)",
+                        "rgb(239, 68, 68)",
+                        "rgb(96, 165, 250)"
+                      ],
+                      borderWidth: 1
+                    }
+                  ]
+                }}
+                options={{
+                  height: 300,
+                  valueSuffix: " produtos",
+                  showLegend: true,
+                  showGrid: false
+                }}
               />
             </CardContent>
           </Card>
@@ -482,14 +667,26 @@ export default function DashboardPage() {
               <CardTitle>Vendas Mensais</CardTitle>
             </CardHeader>
             <CardContent>
-              <LineChart
-                data={stats.monthlySales.map((item) => ({
-                  name: item.month,
-                  value: item.sales,
-                }))}
-                xKey="name"
-                yKey="value"
-                height={300}
+              <ChartFactory 
+                type="bar"
+                data={{
+                  labels: stats.monthlySales.map(item => item.month),
+                  datasets: [
+                    {
+                      label: "Vendas",
+                      data: stats.monthlySales.map(item => item.sales),
+                      backgroundColor: "rgba(99, 102, 241, 0.7)",
+                      borderColor: "rgb(99, 102, 241)",
+                      borderWidth: 1
+                    }
+                  ]
+                }}
+                options={{
+                  height: 300,
+                  valuePrefix: "R$",
+                  showLegend: false,
+                  showGrid: true
+                }}
               />
             </CardContent>
           </Card>
@@ -499,12 +696,37 @@ export default function DashboardPage() {
               <CardTitle>Produtos por Categoria</CardTitle>
             </CardHeader>
             <CardContent>
-              <PieChart
-                data={stats.productCategories.map((item) => ({
-                  name: item.category,
-                  value: item.count,
-                }))}
-                height={300}
+              <ChartFactory 
+                type="pie"
+                data={{
+                  labels: stats.productCategories.map(item => item.category),
+                  datasets: [
+                    {
+                      data: stats.productCategories.map(item => item.count),
+                      backgroundColor: [
+                        "rgba(99, 102, 241, 0.7)",
+                        "rgba(52, 211, 153, 0.7)",
+                        "rgba(251, 191, 36, 0.7)",
+                        "rgba(239, 68, 68, 0.7)",
+                        "rgba(96, 165, 250, 0.7)"
+                      ],
+                      borderColor: [
+                        "rgb(99, 102, 241)",
+                        "rgb(52, 211, 153)",
+                        "rgb(251, 191, 36)",
+                        "rgb(239, 68, 68)",
+                        "rgb(96, 165, 250)"
+                      ],
+                      borderWidth: 1
+                    }
+                  ]
+                }}
+                options={{
+                  height: 300,
+                  valueSuffix: " produtos",
+                  showLegend: true,
+                  showGrid: false
+                }}
               />
             </CardContent>
           </Card>
@@ -515,14 +737,28 @@ export default function DashboardPage() {
             <CardTitle>Vendas Recentes</CardTitle>
           </CardHeader>
           <CardContent>
-            <BarChart
-              data={stats.recentSales.map((item) => ({
-                name: item.date,
-                value: item.amount,
-              }))}
-              xKey="name"
-              yKey="value"
-              height={300}
+            <ChartFactory 
+              type="line"
+              data={{
+                labels: stats.recentSales.map(item => item.date),
+                datasets: [
+                  {
+                    label: "Vendas",
+                    data: stats.recentSales.map(item => item.amount),
+                    backgroundColor: "rgba(99, 102, 241, 0.1)",
+                    borderColor: "rgb(99, 102, 241)",
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                  }
+                ]
+              }}
+              options={{
+                height: 300,
+                valuePrefix: "R$",
+                showLegend: false,
+                showGrid: true
+              }}
             />
           </CardContent>
         </Card>
@@ -530,4 +766,3 @@ export default function DashboardPage() {
     </MainLayout>
   )
 }
-

@@ -3,43 +3,7 @@ import 'jspdf-autotable';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatCurrency } from './utils';
-
-interface OrderItem {
-  product_code: string;
-  product_name: string;
-  quantity: number;
-  unit: string;
-  unit_price: number;
-  discount_percent: number;
-  subtotal: number;
-  total: number;
-}
-
-interface OrderData {
-  order_number: string;
-  issue_date: Date;
-  delivery_date?: Date;
-  customer: {
-    name: string;
-    document: string;
-    email: string;
-    phone: string;
-  };
-  seller?: {
-    name: string;
-  };
-  shipping_address: string;
-  billing_address: string;
-  payment_method: string;
-  payment_term: string;
-  items: OrderItem[];
-  shipping_cost: number;
-  other_costs: number;
-  subtotal: number;
-  tax_total: number;
-  total_amount: number;
-  notes: string;
-}
+import { OrderData, OrderItem } from './types';
 
 export const generateOrderPDF = (orderData: OrderData): string => {
   // Criar nova instância do PDF
