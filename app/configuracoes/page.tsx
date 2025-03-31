@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { MainLayout } from "@/components/layout/main-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,25 @@ import { User, Building, FileText, Shield, PlusCircle, Pencil, Trash, Mail, Phon
 
 export default function ConfiguracoesPage() {
   const [activeTab, setActiveTab] = useState("perfil")
+  const router = useRouter()
+  
+  useEffect(() => {
+    // Pegar o parâmetro da URL e selecionar a aba correspondente
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search)
+      const tabParam = searchParams.get('tab')
+      if (tabParam && ['perfil', 'empresa', 'usuarios', 'fiscal'].includes(tabParam)) {
+        setActiveTab(tabParam)
+      }
+    }
+  }, [])
+
+  // Atualizar a URL quando o usuário mudar de aba
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    // Atualizar a URL sem usar a opção scroll que não é suportada
+    router.push(`/configuracoes?tab=${value}`)
+  }
 
   // Dados simulados para usuários
   const usuarios = [
@@ -60,7 +80,7 @@ export default function ConfiguracoesPage() {
           <h1 className="text-2xl font-bold">Configurações</h1>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="perfil" className="flex items-center gap-2">
               <User className="h-4 w-4" />

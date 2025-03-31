@@ -142,8 +142,8 @@ export default function FluxoCaixaPage() {
   const [filteredData, setFilteredData] = useState<CashFlowData[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [typeFilter, setTypeFilter] = useState<string>("")
-  const [categoryFilter, setCategoryFilter] = useState<string>("")
-  const [statusFilter, setStatusFilter] = useState<string>("")
+  const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const [statusFilter, setStatusFilter] = useState<string>("all")
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
 
@@ -182,9 +182,9 @@ export default function FluxoCaixaPage() {
         item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.category.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesType = !typeFilter || item.type === typeFilter;
-      const matchesCategory = !categoryFilter || item.category === categoryFilter;
-      const matchesStatus = !statusFilter || item.status === statusFilter;
+      const matchesType = typeFilter === "" || typeFilter === "all" || item.type === typeFilter;
+      const matchesCategory = categoryFilter === "" || categoryFilter === "all" || item.category === categoryFilter;
+      const matchesStatus = statusFilter === "" || statusFilter === "all" || item.status === statusFilter;
       
       return matchesSearch && matchesType && matchesCategory && matchesStatus;
     });
@@ -447,12 +447,12 @@ export default function FluxoCaixaPage() {
                   </div>
 
                   <div className="w-full md:w-1/5">
-                    <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <Select value={typeFilter || "all"} onValueChange={(value) => setTypeFilter(value === "all" ? "" : value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Tipo" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todos os tipos</SelectItem>
+                        <SelectItem value="all">Todos os tipos</SelectItem>
                         <SelectItem value="income">Receita</SelectItem>
                         <SelectItem value="expense">Despesa</SelectItem>
                       </SelectContent>
@@ -460,12 +460,12 @@ export default function FluxoCaixaPage() {
                   </div>
 
                   <div className="w-full md:w-1/5">
-                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value === "all" ? "" : value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Categoria" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todas as categorias</SelectItem>
+                        <SelectItem value="all">Todas as categorias</SelectItem>
                         {categories.map((category) => (
                           <SelectItem key={category} value={category}>
                             {category}
@@ -476,12 +476,12 @@ export default function FluxoCaixaPage() {
                   </div>
 
                   <div className="w-full md:w-1/5">
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value === "all" ? "" : value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todos os status</SelectItem>
+                        <SelectItem value="all">Todos os status</SelectItem>
                         <SelectItem value="completed">Concluído</SelectItem>
                         <SelectItem value="pending">Pendente</SelectItem>
                         <SelectItem value="canceled">Cancelado</SelectItem>
@@ -530,25 +530,22 @@ export default function FluxoCaixaPage() {
                           data: dailyCashFlow.map(item => item.income),
                           borderColor: "rgb(34, 197, 94)",
                           backgroundColor: "rgba(34, 197, 94, 0.1)",
-                          borderWidth: 2,
                           fill: false
-                        },
+                        } as any,
                         {
                           label: "Despesas",
                           data: dailyCashFlow.map(item => item.expense),
                           borderColor: "rgb(239, 68, 68)",
                           backgroundColor: "rgba(239, 68, 68, 0.1)",
-                          borderWidth: 2,
                           fill: false
-                        },
+                        } as any,
                         {
                           label: "Saldo",
                           data: dailyCashFlow.map(item => item.balance),
                           borderColor: "rgb(59, 130, 246)",
                           backgroundColor: "rgba(59, 130, 246, 0.1)",
-                          borderWidth: 2,
                           fill: true
-                        }
+                        } as any
                       ]
                     }}
                     options={{
@@ -575,16 +572,14 @@ export default function FluxoCaixaPage() {
                           label: "Receitas",
                           data: categorySummary.map(item => item.income),
                           backgroundColor: "rgba(34, 197, 94, 0.7)",
-                          borderColor: "rgb(34, 197, 94)",
-                          borderWidth: 1
-                        },
+                          borderColor: "rgb(34, 197, 94)"
+                        } as any,
                         {
                           label: "Despesas",
                           data: categorySummary.map(item => item.expense),
                           backgroundColor: "rgba(239, 68, 68, 0.7)",
-                          borderColor: "rgb(239, 68, 68)",
-                          borderWidth: 1
-                        }
+                          borderColor: "rgb(239, 68, 68)"
+                        } as any
                       ]
                     }}
                     options={{

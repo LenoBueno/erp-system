@@ -125,7 +125,7 @@ export function Header() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{userName || "Usuário"}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push("/configuracoes/perfil")}>Meu Perfil</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/configuracoes?tab=perfil")}>Meu Perfil</DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push("/configuracoes")}>Configurações</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>Sair</DropdownMenuItem>
@@ -174,9 +174,9 @@ export function Header() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => router.push("/configuracoes/perfil")}>Perfil</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/configuracoes/empresa")}>Empresa</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/configuracoes/usuarios")}>Usuários</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/configuracoes?tab=perfil")}>Perfil</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/configuracoes?tab=empresa")}>Empresa</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/configuracoes?tab=usuarios")}>Usuários</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -202,4 +202,3 @@ export function Header() {
     </header>
   )
 }
-
