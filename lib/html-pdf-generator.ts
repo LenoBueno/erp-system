@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatCurrency } from './utils';
 
 interface OrderItem {
   product_code: string;
@@ -37,14 +38,6 @@ interface OrderData {
   total_amount: number;
   notes: string;
 }
-
-// Função auxiliar para formatar valores monetários
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-};
 
 export const generateOrderHTML = (orderData: OrderData): string => {
   // Criar o HTML do pedido
