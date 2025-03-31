@@ -11,10 +11,12 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Função para formatar moeda em formato brasileiro (R$)
  */
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: number, showSymbol: boolean = true): string {
   return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
+    style: showSymbol ? "currency" : "decimal",
     currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value)
 }
 
@@ -120,4 +122,38 @@ export function validateCNPJ(cnpj: string): boolean {
   if (result !== Number.parseInt(digits.charAt(1))) return false
 
   return true
+}
+
+/**
+ * Função para formatar número de telefone
+ */
+export function maskPhone(value: string): string {
+  value = value.replace(/\D/g, "")
+  
+  if (value.length === 0) {
+    return ""
+  }
+  
+  // Formato para celular: (99) 99999-9999
+  if (value.length <= 11) {
+    value = value.replace(/^(\d{2})(\d)/g, "($1) $2")
+    value = value.replace(/(\d)(\d{4})$/, "$1-$2")
+  }
+  // Formato para telefone fixo: (99) 9999-9999
+  else {
+    value = value.replace(/^(\d{2})(\d)/g, "($1) $2")
+    value = value.replace(/(\d)(\d{4})$/, "$1-$2")
+    // Se tiver mais de 11 dígitos, corta para 11
+    value = value.substring(0, 15)
+  }
+  
+  return value
+}
+
+/**
+ * Função para validar email
+ */
+export function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
 }

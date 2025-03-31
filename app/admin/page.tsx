@@ -2,34 +2,39 @@
 
 import { useState } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { 
-  BarChart3, 
-  Activity, 
-  Database, 
-  Shield, 
-  FileBarChart, 
+  BarChart, 
+  ArrowUpRight, 
+  ShieldCheck, 
+  Server, 
+  HardDrive, 
   Webhook, 
-  Settings, 
-  AlertTriangle, 
+  FileText,
   Users,
   Info,
   Bell,
   Clock,
   FileHeart,
-  Server
+  AlertTriangle,
+  Activity
 } from "lucide-react"
-import { DashboardWidget } from "@/components/admin/dashboard-widget"
-import { ActivityLog } from "@/components/admin/activity-log"
-import { SystemHealth } from "@/components/admin/system-health"
-import { BackupControl } from "@/components/admin/backup-control"
-import { SecurityAudit } from "@/components/admin/security-audit"
-import { SessionMonitor } from "@/components/admin/session-monitor"
-import { IntegrationHub } from "@/components/admin/integration-hub"
-import { SystemInfo } from "@/components/admin/system-info"
-import { ReportDashboard } from "@/components/admin/report-dashboard"
+
+// Importar todos os componentes administrativos do arquivo de índice
+import {
+  DashboardWidget,
+  ActivityLog,
+  SystemHealth,
+  BackupControl,
+  SecurityAudit,
+  SessionMonitor,
+  IntegrationHub,
+  AdvancedReports,
+  FiscalCompliance,
+  SystemInfo
+} from "@/components/admin"
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -48,19 +53,19 @@ export default function AdminPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-5 mb-8">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
+              <BarChart className="h-4 w-4" />
               Dashboard
             </TabsTrigger>
             <TabsTrigger value="security" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
+              <ShieldCheck className="h-4 w-4" />
               Segurança
             </TabsTrigger>
             <TabsTrigger value="system" className="flex items-center gap-2">
-              <Database className="h-4 w-4" />
+              <Server className="h-4 w-4" />
               Sistema
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-2">
-              <FileBarChart className="h-4 w-4" />
+              <FileText className="h-4 w-4" />
               Relatórios
             </TabsTrigger>
             <TabsTrigger value="integrations" className="flex items-center gap-2">
@@ -123,7 +128,7 @@ export default function AdminPage() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <DashboardWidget 
                 title="Usuários Ativos" 
                 value="12" 
@@ -136,7 +141,7 @@ export default function AdminPage() {
                 title="Uso de Armazenamento" 
                 value="62%" 
                 change="+5%" 
-                icon={<Database className="h-5 w-5 text-blue-500" />} 
+                icon={<HardDrive className="h-5 w-5 text-blue-500" />} 
                 description="Espaço de armazenamento utilizado"
               />
               
@@ -159,14 +164,11 @@ export default function AdminPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl flex items-center">
-                  <Server className="h-5 w-5 mr-2 text-indigo-500" />
-                  Registro de Atividades
-                </CardTitle>
-                <CardDescription>Histórico completo de ações no sistema</CardDescription>
+                <CardTitle>Fiscal Compliance</CardTitle>
+                <CardDescription>Status de conformidade fiscal e obrigações pendentes</CardDescription>
               </CardHeader>
               <CardContent>
-                <ActivityLog limit={10} />
+                <FiscalCompliance />
               </CardContent>
             </Card>
           </TabsContent>
@@ -175,10 +177,7 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl flex items-center">
-                    <Shield className="h-5 w-5 mr-2 text-red-500" />
-                    Auditoria de Segurança
-                  </CardTitle>
+                  <CardTitle>Auditoria de Segurança</CardTitle>
                   <CardDescription>Análise de segurança e ameaças detectadas</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -188,10 +187,7 @@ export default function AdminPage() {
               
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl flex items-center">
-                    <Users className="h-5 w-5 mr-2 text-blue-500" />
-                    Monitoramento de Sessões
-                  </CardTitle>
+                  <CardTitle>Monitoramento de Sessões</CardTitle>
                   <CardDescription>Sessões ativas e histórico de acessos</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -202,83 +198,56 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="system" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Informações do Sistema</CardTitle>
+                <CardDescription>Detalhes sobre a versão do sistema e atualizações disponíveis</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SystemInfo />
+              </CardContent>
+            </Card>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl flex items-center">
-                    <Database className="h-5 w-5 mr-2 text-green-500" />
-                    Backup do Sistema
-                  </CardTitle>
-                  <CardDescription>Gerenciamento de backups e restauração</CardDescription>
+                  <CardTitle>Saúde do Sistema</CardTitle>
+                  <CardDescription>Monitoramento de recursos e desempenho</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <BackupControl />
+                  <SystemHealth />
                 </CardContent>
               </Card>
               
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl flex items-center">
-                    <Info className="h-5 w-5 mr-2 text-blue-500" />
-                    Informações do Sistema
-                  </CardTitle>
-                  <CardDescription>Versão, atualizações e status</CardDescription>
+                  <CardTitle>Backup e Restauração</CardTitle>
+                  <CardDescription>Gerenciamento de backups do sistema</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <SystemInfo />
+                  <BackupControl />
                 </CardContent>
               </Card>
             </div>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center">
-                  <Activity className="h-5 w-5 mr-2 text-amber-500" />
-                  Monitoramento de Performance
-                </CardTitle>
-                <CardDescription>Detalhes sobre o desempenho do sistema</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <SystemHealth />
-                  
-                  <div className="border-t pt-4">
-                    <h3 className="font-medium mb-4">Comandos de Manutenção</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                      <Button variant="outline" size="sm" className="w-full">Limpar Cache</Button>
-                      <Button variant="outline" size="sm" className="w-full">Otimizar Banco de Dados</Button>
-                      <Button variant="outline" size="sm" className="w-full">Verificar Integridade</Button>
-                      <Button variant="outline" size="sm" className="w-full">Reiniciar Serviços</Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
-          
+
           <TabsContent value="reports" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl flex items-center">
-                  <FileBarChart className="h-5 w-5 mr-2 text-indigo-500" />
-                  Relatórios Administrativos
-                </CardTitle>
-                <CardDescription>Geração de relatórios para todos os módulos do sistema</CardDescription>
+                <CardTitle>Relatórios Gerenciais Avançados</CardTitle>
+                <CardDescription>Relatórios personalizados com dados consolidados</CardDescription>
               </CardHeader>
               <CardContent>
-                <ReportDashboard />
+                <AdvancedReports />
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="integrations" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl flex items-center">
-                  <Webhook className="h-5 w-5 mr-2 text-purple-500" />
-                  Central de Integrações
-                </CardTitle>
-                <CardDescription>Gerencie conexões com sistemas e serviços externos</CardDescription>
+                <CardTitle>Central de Integrações</CardTitle>
+                <CardDescription>Gerenciamento de APIs e sistemas externos</CardDescription>
               </CardHeader>
               <CardContent>
                 <IntegrationHub />
