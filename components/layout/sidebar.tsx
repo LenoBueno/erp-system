@@ -73,22 +73,31 @@ const SidebarItem = ({ icon, title, path, subItems }: SidebarItemProps) => {
           {/* Linha vertical conectando todos os subitens */}
           <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-border"></div>
           
-          {subItems.map((item, index) => (
-            <Link key={index} href={item.path}>
-              <div
-                className={cn(
-                  "py-2 px-3 text-sm cursor-pointer transition-colors relative",
-                  pathname === item.path 
-                    ? "text-foreground font-medium" 
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {/* Linha horizontal conectando ao item */}
-                <div className="absolute left-[-16px] top-1/2 transform -translate-y-1/2 w-4 h-[1px] bg-border"></div>
-                {item.title}
-              </div>
-            </Link>
-          ))}
+          {subItems.map((item, index) => {
+            const isLastItem = index === subItems.length - 1;
+            return (
+              <Link key={index} href={item.path}>
+                <div
+                  className={cn(
+                    "py-2 px-3 text-sm cursor-pointer transition-colors relative",
+                    pathname === item.path 
+                      ? "text-foreground font-medium" 
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {/* Linha horizontal conectando ao item */}
+                  <div className="absolute left-[-16px] top-1/2 transform -translate-y-1/2 w-4 h-[1px] bg-border"></div>
+                  
+                  {/* Para o último item, adicionar uma classe que limita a linha vertical */}
+                  {isLastItem && (
+                    <div className="absolute left-[-16px] top-1/2 bottom-0 w-[1px] bg-background"></div>
+                  )}
+                  
+                  {item.title}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
@@ -249,4 +258,3 @@ export function Sidebar() {
     </div>
   )
 }
-

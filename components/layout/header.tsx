@@ -166,19 +166,14 @@ export function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Configurações */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Settings className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => router.push("/configuracoes?tab=perfil")}>Perfil</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/configuracoes?tab=empresa")}>Empresa</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/configuracoes?tab=usuarios")}>Usuários</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Configurações - agora leva diretamente para a página */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => router.push("/configuracoes")}
+        >
+          <Settings className="h-5 w-5" />
+        </Button>
 
         {/* Modo (Claro/Escuro) */}
         <Button 
