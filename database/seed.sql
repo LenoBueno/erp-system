@@ -3,7 +3,7 @@ USE erp_system;
 
 -- Inserir usuário administrador (senha: admin123)
 INSERT INTO users (name, email, password, role) VALUES 
-('Administrador', 'admin@simpleink.com', '$2b$10$X7o4c5/QR5yEr5G9OB3Yp.uj.qHusAMNHX5PJQRzlR5vxABiDx.Oe', 'admin');
+('Administrador', 'root@admin.com', '$2b$10$X7o4c5/QR5yEr5G9OB3Yp.uj.qHusAMNHX5PJQRzlR5vxABiDx.Oe', 'admin');
 
 -- Inserir categorias
 INSERT INTO categories (name, description) VALUES 

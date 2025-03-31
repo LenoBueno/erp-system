@@ -6,6 +6,14 @@ import { env } from "@/lib/env"
 
 export async function POST(request: Request) {
   try {
+    // Validate database connection first
+    try {
+      await db.query('SELECT 1');
+    } catch (dbError) {
+      console.error('Database connection error:', dbError);
+      return NextResponse.json({ message: "Erro de conexão com o banco de dados", error: "Database connection failed" }, { status: 503 });
+    }
+
     // Pegar email e senha do corpo da requisição
     const { email, password } = await request.json()
 
@@ -41,13 +49,18 @@ export async function POST(request: Request) {
         // A senha está criptografada com bcrypt
         passwordMatch = await bcrypt.compare(password, user.password)
       } else {
-        // A senha não está criptografada, comparando diretamente
-        passwordMatch = String(password) === String(user.password)
-        console.log("Comparação de senha não criptografada:", {
-          senhaFornecida: password,
+        // A senha está em SHA-256, então precisamos comparar os hashes
+        const crypto = require('crypto');
+        const hashedPassword = crypto
+          .createHash('sha256')
+          .update(password)
+          .digest('hex');
+        passwordMatch = hashedPassword === user.password;
+        console.log("Comparação de senha SHA-256:", {
+          senhaFornecida: hashedPassword,
           senhaBanco: user.password,
           resultado: passwordMatch
-        })
+        });
       }
     }
 
@@ -82,8 +95,20 @@ export async function POST(request: Request) {
     return res
 
   } catch (error) {
-    // Melhor tratamento de erro
-    console.error("Erro ao fazer login:", error)
-    return NextResponse.json({ message: "Erro interno do servidor", error: error.message || "Desconhecido" }, { status: 500 })
+    // Tratamento de erro detalhado
+    console.error("Erro ao fazer login:", error);
+    
+    if (error.code === 'ECONNREFUSED' || error.code === 'PROTOCOL_CONNECTION_LOST') {
+      return NextResponse.json({ message: "Erro de conexão com o banco de dados", error: "Database connection failed" }, { status: 503 });
+    }
+    
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ message: "Formato de requisição inválido", error: "Invalid request format" }, { status: 400 });
+    }
+    
+    return NextResponse.json({ 
+      message: "Erro interno do servidor", 
+      error: process.env.NODE_ENV === 'development' ? error.message : "Internal server error" 
+    }, { status: 500 })
   }
 }

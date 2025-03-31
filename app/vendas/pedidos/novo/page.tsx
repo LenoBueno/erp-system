@@ -888,8 +888,12 @@ export default function NewOrderPage() {
                       onChange={handleDiscountChange}
                     />
                   </div>
-                  <div className="md:col-span-2">
-                    <Button onClick={addItemToOrder} className="w-full">
+                  <div className="md:col-span-2 flex items-end">
+                    <Button 
+                      onClick={addItemToOrder} 
+                      className="w-full h-10 bg-primary hover:bg-primary/90 text-white font-medium"
+                      size="default"
+                    >
                       <Plus className="mr-2 h-4 w-4" />
                       Adicionar ao Pedido
                     </Button>
