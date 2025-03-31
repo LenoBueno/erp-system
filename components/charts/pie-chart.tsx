@@ -1,4 +1,5 @@
 "use client"
+import React from "react"
 import { PieChart as RechartsPieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts"
 import { useTheme } from "next-themes"
 
@@ -9,15 +10,46 @@ interface PieChartData {
 }
 
 interface PieChartProps {
-  data: PieChartData[]
+  data: PieChartData[] | any
+  labels?: string[]
   height?: number
 }
 
-export function PieChart({ data, height = 400 }: PieChartProps) {
+export function PieChart({ data, labels, height = 400 }: PieChartProps) {
   const { theme } = useTheme()
   const isDark = theme === "dark"
 
-  if (!data || data.length === 0) {
+  // Transformar os dados para o formato correto se necessário
+  const processedData = React.useMemo(() => {
+    // Se não houver dados, retornar array vazio
+    if (!data) return []
+
+    // Se data já for um array de objetos com name e value, usar diretamente
+    if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object' && 'name' in data[0] && 'value' in data[0]) {
+      return data
+    }
+
+    // Se data for um array de números e labels for fornecido, combinar eles
+    if (Array.isArray(data) && Array.isArray(labels) && data.length === labels.length) {
+      return data.map((value, index) => ({
+        name: labels[index],
+        value: typeof value === 'number' ? value : 0
+      }))
+    }
+
+    // Se data for um objeto, converter para array
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      return Object.entries(data).map(([key, value]) => ({
+        name: key,
+        value: typeof value === 'number' ? value : 0
+      }))
+    }
+
+    // Caso padrão: retornar array vazio
+    return []
+  }, [data, labels])
+
+  if (!processedData || processedData.length === 0) {
     return (
       <div className="flex items-center justify-center" style={{ height }}>
         <p>No data available</p>
@@ -29,7 +61,7 @@ export function PieChart({ data, height = 400 }: PieChartProps) {
     <ResponsiveContainer width="100%" height={height}>
       <RechartsPieChart>
         <Pie
-          data={data}
+          data={processedData}
           cx="50%"
           cy="50%"
           labelLine={true}
@@ -38,7 +70,7 @@ export function PieChart({ data, height = 400 }: PieChartProps) {
           dataKey="value"
           label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
         >
-          {data.map((entry, index) => (
+          {processedData.map((entry: PieChartData, index: number) => (
             <Cell key={`cell-${index}`} fill={entry.backgroundColor || `#${Math.floor(Math.random()*16777215).toString(16)}`} />
           ))}
         </Pie>

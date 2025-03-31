@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Printer, FileText, Edit, Check, X, AlertTriangle, Mail } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
-import { NFEModal } from "@/components/nfe/nfe-modal"
+import { NFEFormModal } from "@/components/nfe/nfe-form-modal"
 import { EmailOrderModal } from "@/components/nfe/email-order-modal"
 
 interface OrderItem {
@@ -522,12 +522,11 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
       {/* Modais */}
       {order && (
         <>
-          <NFEModal 
+          <NFEFormModal 
             isOpen={isNFEModalOpen}
             onClose={() => setIsNFEModalOpen(false)}
             orderId={params.id}
             orderNumber={order.order_number}
-            customerEmail={order.customer.email}
           />
           <EmailOrderModal 
             isOpen={isEmailModalOpen}

@@ -1,4 +1,4 @@
-export { BarChart } from "./bar-chart"
-export { LineChart } from "./line-chart"
-export { PieChart } from "./pie-chart"
+export * from "./bar-chart"
+export * from "./line-chart"
+export * from "./pie-chart"
 

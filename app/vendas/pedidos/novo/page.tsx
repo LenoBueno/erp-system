@@ -82,6 +82,7 @@ export default function NewOrderPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [orderNumber, setOrderNumber] = useState("")
+  const [orderType, setOrderType] = useState("normal")
   const [orderStatus, setOrderStatus] = useState("aberto")
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [selectedSeller, setSelectedSeller] = useState<number | null>(null)
@@ -90,10 +91,12 @@ export default function NewOrderPage() {
     product_id: number
     quantity: number
     discount_percent: number
+    unit: string
   }>({
     product_id: 0,
     quantity: 1,
     discount_percent: 0,
+    unit: ""
   })
   const [issueDate, setIssueDate] = useState<Date>(new Date())
   const [deliveryDate, setDeliveryDate] = useState<Date | undefined>(undefined)
@@ -111,9 +114,9 @@ export default function NewOrderPage() {
   // Métodos de pagamento disponíveis
   const paymentMethods: PaymentMethod[] = [
     { id: "pix", name: "PIX" },
-    { id: "boleto", name: "Boleto Bancário" },
-    { id: "cartao", name: "Cartão de Crédito" },
-    { id: "transferencia", name: "Transferência Bancária" },
+    { id: "boleto", name: "Boleto" },
+    { id: "cartao", name: "Cartão" },
+    { id: "transferencia", name: "Depósito" },
     { id: "dinheiro", name: "Dinheiro" },
   ]
 
@@ -199,9 +202,11 @@ export default function NewOrderPage() {
   }
 
   const handleProductChange = (productId: string) => {
+    const product = products.find(p => p.id === parseInt(productId))
     setCurrentItem({
       ...currentItem,
       product_id: parseInt(productId),
+      unit: product?.unit || ""
     })
   }
 
@@ -213,6 +218,13 @@ export default function NewOrderPage() {
         quantity: value,
       })
     }
+  }
+
+  const handleUnitChange = (unit: string) => {
+    setCurrentItem({
+      ...currentItem,
+      unit: unit,
+    })
   }
 
   const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -253,7 +265,7 @@ export default function NewOrderPage() {
       product_name: product.name,
       quantity: currentItem.quantity,
       unit_price: unitPrice,
-      unit: product.unit,
+      unit: currentItem.unit || product.unit,
       discount_percent: currentItem.discount_percent,
       tax_rate: 10, // Taxa fixa de 10% para v0
       subtotal: subtotalWithDiscount,
@@ -267,6 +279,7 @@ export default function NewOrderPage() {
       product_id: 0,
       quantity: 1,
       discount_percent: 0,
+      unit: ""
     })
   }
 
@@ -292,6 +305,82 @@ export default function NewOrderPage() {
       style: "currency",
       currency: "BRL",
     }).format(value)
+  }
+
+  const handleSaveAsDraft = async () => {
+    if (!selectedCustomer) {
+      toast({
+        title: "Cliente não selecionado",
+        description: "Selecione um cliente para o pedido",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsSaving(true)
+
+    try {
+      const orderData = {
+        order_number: orderNumber,
+        customer_id: selectedCustomer.id,
+        seller_id: selectedSeller,
+        status: "rascunho",
+        order_type: orderType,
+        issue_date: issueDate.toISOString(),
+        delivery_date: deliveryDate ? deliveryDate.toISOString() : null,
+        payment_method: paymentMethod,
+        payment_term: paymentTerm,
+        shipping_address: shippingAddress,
+        billing_address: billingAddress,
+        shipping_cost: shippingCost,
+        other_costs: otherCosts,
+        subtotal: calculateSubtotal(),
+        tax_total: calculateTaxTotal(),
+        total_amount: calculateOrderTotal(),
+        notes: notes,
+        items: orderItems.map((item) => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          unit: item.unit,
+          discount_percent: item.discount_percent,
+          tax_rate: item.tax_rate,
+          subtotal: item.subtotal,
+          total: item.total,
+        })),
+      }
+
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      })
+
+      if (!response.ok) {
+        throw new Error("Falha ao salvar rascunho")
+      }
+
+      const savedOrder = await response.json()
+
+      toast({
+        title: "Rascunho salvo com sucesso",
+        description: `Pedido ${orderNumber} foi salvo como rascunho`,
+      })
+
+      // Redirecionar para a página do pedido
+      router.push(`/vendas/pedidos/${savedOrder.id}`)
+    } catch (error) {
+      console.error("Erro ao salvar rascunho:", error)
+      toast({
+        title: "Erro ao salvar rascunho",
+        description: "Ocorreu um erro ao tentar salvar o rascunho",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleSaveOrder = async () => {
@@ -321,6 +410,7 @@ export default function NewOrderPage() {
         customer_id: selectedCustomer.id,
         seller_id: selectedSeller,
         status: orderStatus,
+        order_type: orderType,
         issue_date: issueDate.toISOString(),
         delivery_date: deliveryDate ? deliveryDate.toISOString() : null,
         payment_method: paymentMethod,
@@ -337,6 +427,7 @@ export default function NewOrderPage() {
           product_id: item.product_id,
           quantity: item.quantity,
           unit_price: item.unit_price,
+          unit: item.unit,
           discount_percent: item.discount_percent,
           tax_rate: item.tax_rate,
           subtotal: item.subtotal,
@@ -378,7 +469,13 @@ export default function NewOrderPage() {
   }
 
   const handleCancel = () => {
-    router.push("/vendas/pedidos")
+    if (orderItems.length > 0) {
+      if (window.confirm("Tem certeza que deseja cancelar? Todas as alterações serão perdidas.")) {
+        router.push("/vendas/pedidos")
+      }
+    } else {
+      router.push("/vendas/pedidos")
+    }
   }
 
   const handlePrintPDF = () => {
@@ -459,6 +556,10 @@ export default function NewOrderPage() {
               <Save className="mr-2 h-4 w-4" />
               Salvar Pedido
             </Button>
+            <Button variant="secondary" onClick={handleSaveAsDraft} disabled={isSaving}>
+              <FileText className="mr-2 h-4 w-4" />
+              Salvar Rascunho
+            </Button>
             <Button variant="outline" onClick={handleCancel}>
               <X className="mr-2 h-4 w-4" />
               Cancelar
@@ -466,6 +567,10 @@ export default function NewOrderPage() {
             <Button variant="outline" onClick={handlePrintPDF} disabled={orderItems.length === 0 || !selectedCustomer}>
               <Printer className="mr-2 h-4 w-4" />
               Imprimir
+            </Button>
+            <Button variant="outline" onClick={handlePrintPDF} disabled={orderItems.length === 0 || !selectedCustomer}>
+              <Download className="mr-2 h-4 w-4" />
+              Gerar PDF
             </Button>
           </div>
         </div>
@@ -482,6 +587,22 @@ export default function NewOrderPage() {
                     <Input id="orderNumber" value={orderNumber} readOnly className="bg-muted" />
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor="orderType">Tipo de Pedido</Label>
+                    <Select value={orderType} onValueChange={setOrderType}>
+                      <SelectTrigger id="orderType">
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="normal">Pedido Normal</SelectItem>
+                        <SelectItem value="cotacao">Cotação</SelectItem>
+                        <SelectItem value="orcamento">Orçamento</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-2">
                     <Label htmlFor="orderStatus">Status</Label>
                     <Select value={orderStatus} onValueChange={setOrderStatus}>
                       <SelectTrigger id="orderStatus">
@@ -489,7 +610,7 @@ export default function NewOrderPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="aberto">Aberto</SelectItem>
-                        <SelectItem value="aprovado">Aprovado</SelectItem>
+                        <SelectItem value="pendente">Pendente</SelectItem>
                         <SelectItem value="faturado">Faturado</SelectItem>
                         <SelectItem value="cancelado">Cancelado</SelectItem>
                       </SelectContent>
@@ -610,6 +731,25 @@ export default function NewOrderPage() {
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="shippingCity">Cidade</Label>
+                    <Input
+                      id="shippingCity"
+                      value={selectedCustomer?.city || ""}
+                      onChange={(e) => {}}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="shippingPostalCode">CEP</Label>
+                    <Input
+                      id="shippingPostalCode"
+                      value={selectedCustomer?.postal_code || ""}
+                      onChange={(e) => {}}
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="billingAddress">Endereço de Cobrança</Label>
                   <Textarea
@@ -618,6 +758,25 @@ export default function NewOrderPage() {
                     onChange={(e) => setBillingAddress(e.target.value)}
                     rows={3}
                   />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="billingCity">Cidade</Label>
+                    <Input
+                      id="billingCity"
+                      value={selectedCustomer?.city || ""}
+                      onChange={(e) => {}}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="billingPostalCode">CEP</Label>
+                    <Input
+                      id="billingPostalCode"
+                      value={selectedCustomer?.postal_code || ""}
+                      onChange={(e) => {}}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -670,7 +829,7 @@ export default function NewOrderPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                  <div className="md:col-span-5 space-y-2">
+                  <div className="md:col-span-4 space-y-2">
                     <Label htmlFor="product">Produto</Label>
                     <Select onValueChange={handleProductChange}>
                       <SelectTrigger id="product">
@@ -697,6 +856,27 @@ export default function NewOrderPage() {
                     />
                   </div>
                   <div className="md:col-span-2 space-y-2">
+                    <Label htmlFor="unit">Unidade</Label>
+                    <Select value={currentItem.unit} onValueChange={handleUnitChange}>
+                      <SelectTrigger id="unit">
+                        <SelectValue placeholder="Unid." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="un">Unidade</SelectItem>
+                        <SelectItem value="kg">Quilograma</SelectItem>
+                        <SelectItem value="g">Grama</SelectItem>
+                        <SelectItem value="l">Litro</SelectItem>
+                        <SelectItem value="ml">Mililitro</SelectItem>
+                        <SelectItem value="m">Metro</SelectItem>
+                        <SelectItem value="cm">Centímetro</SelectItem>
+                        <SelectItem value="m2">Metro²</SelectItem>
+                        <SelectItem value="m3">Metro³</SelectItem>
+                        <SelectItem value="cx">Caixa</SelectItem>
+                        <SelectItem value="pct">Pacote</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
                     <Label htmlFor="discount">Desconto (%)</Label>
                     <Input
                       id="discount"
@@ -708,10 +888,10 @@ export default function NewOrderPage() {
                       onChange={handleDiscountChange}
                     />
                   </div>
-                  <div className="md:col-span-3">
+                  <div className="md:col-span-2">
                     <Button onClick={addItemToOrder} className="w-full">
                       <Plus className="mr-2 h-4 w-4" />
-                      Adicionar Item
+                      Adicionar ao Pedido
                     </Button>
                   </div>
                 </div>

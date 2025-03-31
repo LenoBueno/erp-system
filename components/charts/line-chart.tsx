@@ -12,7 +12,7 @@ import { useTheme } from "next-themes"
 
 interface LineChartData {
   name: string
-  [key: string]: string | number
+  [key: string]: any
 }
 
 interface LineChartProps {
@@ -24,11 +24,15 @@ interface LineChartProps {
       borderColor: string
       backgroundColor: string
     }>
-  }
+  } | Array<{name: string, value: number, [key: string]: any}> | number[]
+  labels?: string[]
+  label?: string
+  xKey?: string
+  yKey?: string
   height?: number
 }
 
-export function LineChart({ data, height = 400 }: LineChartProps) {
+export function LineChart({ data, labels, label = 'Valor', xKey = 'name', yKey = 'value', height = 400 }: LineChartProps) {
   const { theme } = useTheme()
   const isDark = theme === "dark"
 
@@ -39,7 +43,11 @@ export function LineChart({ data, height = 400 }: LineChartProps) {
     }).format(value)
   }
 
-  if (!data.datasets[0].data || data.datasets[0].data.length === 0) {
+  // Processar os dados com base no formato recebido
+  let chartData: LineChartData[] = []
+
+  // Verificar se não há dados
+  if (!data) {
     return (
       <div className="flex items-center justify-center" style={{ height }}>
         <p>No data available</p>
@@ -47,13 +55,44 @@ export function LineChart({ data, height = 400 }: LineChartProps) {
     )
   }
 
-  const chartData: LineChartData[] = data.labels.map((label, index) => {
-    const dataPoint: LineChartData = { name: label }
-    data.datasets.forEach((dataset) => {
-      dataPoint[dataset.label] = dataset.data[index]
+  // Formato 1: { labels, datasets }
+  if (typeof data === 'object' && !Array.isArray(data) && 'labels' in data && 'datasets' in data) {
+    if (!data.datasets || !data.datasets.length || !data.datasets[0] || !data.datasets[0].data || data.datasets[0].data.length === 0) {
+      return (
+        <div className="flex items-center justify-center" style={{ height }}>
+          <p>No data available</p>
+        </div>
+      )
+    }
+
+    chartData = data.labels.map((label, index) => {
+      const dataPoint: LineChartData = { name: label }
+      data.datasets.forEach((dataset) => {
+        dataPoint[dataset.label] = dataset.data[index]
+      })
+      return dataPoint
     })
-    return dataPoint
-  })
+  }
+  // Formato 2: Array de objetos com name e value
+  else if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object' && xKey in data[0] && yKey in data[0]) {
+    chartData = data as LineChartData[]
+  }
+  // Formato 3: Array de números com labels separados
+  else if (Array.isArray(data) && Array.isArray(labels) && data.length > 0 && typeof data[0] === 'number') {
+    chartData = labels.map((label, index) => {
+      const dataPoint: LineChartData = { name: label }
+      dataPoint[label] = data[index]
+      return dataPoint
+    })
+  }
+  // Se não for nenhum formato reconhecido
+  else {
+    return (
+      <div className="flex items-center justify-center" style={{ height }}>
+        <p>Invalid data format</p>
+      </div>
+    )
+  }
 
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -77,16 +116,36 @@ export function LineChart({ data, height = 400 }: LineChartProps) {
             color: isDark ? "#fff" : "#333",
           }}
         />
-        {data.datasets.map((dataset) => (
+        {/* Renderizar linhas com base no formato dos dados */}
+        {Array.isArray(data) && typeof data[0] === 'object' && xKey in data[0] && yKey in data[0] ? (
           <Line
-            key={dataset.label}
             type="monotone"
-            dataKey={dataset.label}
-            stroke={dataset.borderColor}
+            dataKey={yKey}
+            stroke="#8884d8"
             strokeWidth={2}
             dot={false}
           />
-        ))}
+        ) : Array.isArray(data) && typeof data[0] === 'number' && label ? (
+          <Line
+            type="monotone"
+            dataKey={label}
+            stroke="#8884d8"
+            strokeWidth={2}
+            dot={false}
+          />
+        ) : (
+          // Para o formato { labels, datasets }
+          typeof data === 'object' && !Array.isArray(data) && 'datasets' in data && data.datasets.map((dataset) => (
+            <Line
+              key={dataset.label}
+              type="monotone"
+              dataKey={dataset.label}
+              stroke={dataset.borderColor}
+              strokeWidth={2}
+              dot={false}
+            />
+          ))
+        )}
       </RechartsLineChart>
     </ResponsiveContainer>
   )

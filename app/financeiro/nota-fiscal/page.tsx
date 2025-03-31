@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { FileText, Download, Printer, Search, Plus, Eye, CheckCircle, XCircle, AlertTriangle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { NFEFormModal } from "@/components/nfe/nfe-form-modal"
 
 interface NotaFiscal {
   id: number
@@ -525,58 +526,7 @@ export default function NotaFiscalPage() {
           </TabsContent>
         </Tabs>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Emitir Nota Fiscal</DialogTitle>
-              <DialogDescription>
-                Preencha os dados para emissão da nota fiscal
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="cliente" className="text-right">
-                  Cliente
-                </Label>
-                <Input id="cliente" className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="valor" className="text-right">
-                  Valor
-                </Label>
-                <Input id="valor" className="col-span-3" type="number" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="tipo" className="text-right">
-                  Tipo
-                </Label>
-                <Select defaultValue={activeTab}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nfe">NF-e (Produtos)</SelectItem>
-                    <SelectItem value="nfse">NFS-e (Serviços)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={() => {
-                toast({
-                  title: "Nota fiscal emitida",
-                  description: "A nota fiscal foi emitida com sucesso!",
-                })
-                setIsDialogOpen(false)
-              }}>
-                Emitir
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <NFEFormModal isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
       </div>
     </MainLayout>
   )

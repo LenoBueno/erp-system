@@ -1,4 +1,4 @@
-\"use client"
+"use client"
 
 import { useState, useEffect } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
@@ -408,7 +408,26 @@ export default function CadastroProdutoPage() {
                     />
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="categoria_id">Categoria *</Label>
+                      <Select
+                        value={formData.categoria_id}
+                        onValueChange={(value) => handleSelectChange(value, "categoria_id")}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categorias.map((categoria) => (
+                            <SelectItem key={categoria.id} value={categoria.id.toString()}>
+                              {categoria.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
                     <div className="space-y-2">
                       <Label htmlFor="tipo_item">Tipo de Item *</Label>
                       <Select
@@ -427,7 +446,9 @@ export default function CadastroProdutoPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                    
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="unidade_medida">Unidade de Medida *</Label>
                       <Select
@@ -441,25 +462,6 @@ export default function CadastroProdutoPage() {
                           {unidadesMedida.map((unidade) => (
                             <SelectItem key={unidade.value} value={unidade.value}>
                               {unidade.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="categoria_id">Categoria *</Label>
-                      <Select
-                        value={formData.categoria_id}
-                        onValueChange={(value) => handleSelectChange(value, "categoria_id")}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a categoria" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categorias.map((categoria) => (
-                            <SelectItem key={categoria.id} value={categoria.id.toString()}>
-                              {categoria.name}
                             </SelectItem>
                           ))}
                         </SelectContent>

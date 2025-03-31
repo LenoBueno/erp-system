@@ -62,8 +62,10 @@ export default function DashboardPage() {
           throw new Error("Falha ao carregar dados do dashboard")
         }
         const data = await response.json()
-        setStats(data)
+        // Extrair os dados do objeto stats retornado pela API
+        setStats(data.stats)
       } catch (error) {
+        console.error("Erro ao carregar dashboard:", error)
         toast({
           title: "Erro ao carregar dashboard",
           description: "Não foi possível carregar os dados do dashboard",

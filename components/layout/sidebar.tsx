@@ -139,6 +139,7 @@ export function Sidebar() {
       title: "Produtos",
       path: "/produtos",
       subItems: [
+        { title: "Cadastro", path: "/produtos/cadastro" },
         { title: "Catálogo", path: "/produtos/catalogo" },
         { title: "Categorias", path: "/produtos/categorias" },
         { title: "Estoque", path: "/produtos/estoque" },
