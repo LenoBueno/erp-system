@@ -23,34 +23,66 @@ import { useRouter } from "next/navigation"
 
 interface Customer {
   id: number
+  code: string
   name: string
+  type: "PJ" | "PF"
+  document: string
+  group: string
+  status: "active" | "inactive"
+  
+  // Contatos
   email: string
   phone: string
-  address: string
-  city: string
-  state: string
-  postal_code: string
+  contact_name: string
+  
+  // Endereços
+  billing_address: {
+    street: string
+    number: string
+    complement: string
+    neighborhood: string
+    city: string
+    state: string
+    postal_code: string
+    country: string
+  }
+  shipping_address: {
+    same_as_billing: boolean
+    street: string
+    number: string
+    complement: string
+    neighborhood: string
+    city: string
+    state: string
+    postal_code: string
+    country: string
+  }
+  
+  // Condições Comerciais
+  currency: "BRL" | "USD" | "EUR"
+  price_table: string
+  payment_method: "boleto" | "credit_card" | "pix" | "bank_transfer"
+  payment_term: "cash" | "installments" | "30_days" | "60_days" | "90_days" | "30_60_90_days"
+  
+  // Informações Financeiras
+  credit_limit: number
   total_orders: number
   total_spent: number
+  
+  // Observações e Anexos
+  notes: string
+  attachments: string[]
+  
   created_at: string
+  updated_at: string
 }
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    postal_code: "",
-  })
   const { toast } = useToast()
   const router = useRouter()
 
@@ -85,89 +117,9 @@ export default function CustomersPage() {
     )
   })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      address: "",
-      city: "",
-      state: "",
-      postal_code: "",
-    })
-    setCurrentCustomer(null)
-  }
-
-  const handleOpenDialog = (customer?: Customer) => {
-    if (customer) {
-      setCurrentCustomer(customer)
-      setFormData({
-        name: customer.name,
-        email: customer.email,
-        phone: customer.phone,
-        address: customer.address,
-        city: customer.city,
-        state: customer.state,
-        postal_code: customer.postal_code,
-      })
-    } else {
-      resetForm()
-    }
-    setIsDialogOpen(true)
-  }
-
   const handleOpenDeleteDialog = (customer: Customer) => {
     setCurrentCustomer(customer)
     setIsDeleteDialogOpen(true)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      const url = currentCustomer ? `/api/customers/${currentCustomer.id}` : "/api/customers"
-
-      const method = currentCustomer ? "PUT" : "POST"
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        throw new Error("Falha ao salvar cliente")
-      }
-
-      // Recarregar clientes
-      const customersResponse = await fetch("/api/customers")
-      const customersData = await customersResponse.json()
-      setCustomers(customersData)
-
-      toast({
-        title: currentCustomer ? "Cliente atualizado" : "Cliente criado",
-        description: currentCustomer ? "O cliente foi atualizado com sucesso" : "O cliente foi criado com sucesso",
-      })
-
-      setIsDialogOpen(false)
-      resetForm()
-    } catch (error) {
-      toast({
-        title: "Erro ao salvar cliente",
-        description: "Ocorreu um erro ao tentar salvar o cliente",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
   }
 
   const handleDelete = async () => {
@@ -205,19 +157,12 @@ export default function CustomersPage() {
     }
   }
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value)
-  }
-
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="container mx-auto py-6 space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Clientes</h1>
-          <Button onClick={() => handleOpenDialog()}>
+          <h1 className="text-3xl font-bold">Clientes</h1>
+          <Button onClick={() => router.push("/clientes/cadastro")}>
             <Plus className="mr-2 h-4 w-4" />
             Novo Cliente
           </Button>
@@ -225,52 +170,84 @@ export default function CustomersPage() {
 
         <Card>
           <CardContent className="p-6">
-            <div className="relative mb-6">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Buscar clientes por nome, email ou telefone..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <div className="flex items-center space-x-2 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Buscar por nome, email ou telefone..."
+                  className="pl-8"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
 
             {isLoading ? (
-              <div className="text-center py-4">Carregando clientes...</div>
+              <div className="text-center py-10">
+                <p>Carregando clientes...</p>
+              </div>
             ) : filteredCustomers.length === 0 ? (
-              <div className="text-center py-4">Nenhum cliente encontrado</div>
+              <div className="text-center py-10">
+                <p>Nenhum cliente encontrado.</p>
+              </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Código</TableHead>
                       <TableHead>Nome</TableHead>
+                      <TableHead>Documento</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Telefone</TableHead>
-                      <TableHead>Cidade/UF</TableHead>
-                      <TableHead>Pedidos</TableHead>
-                      <TableHead>Total Gasto</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredCustomers.map((customer) => (
                       <TableRow key={customer.id}>
-                        <TableCell className="font-medium">{customer.name}</TableCell>
+                        <TableCell className="font-medium">{customer.code}</TableCell>
+                        <TableCell>{customer.name}</TableCell>
+                        <TableCell>{customer.document}</TableCell>
                         <TableCell>{customer.email}</TableCell>
                         <TableCell>{customer.phone}</TableCell>
-                        <TableCell>{`${customer.city}/${customer.state}`}</TableCell>
-                        <TableCell>{customer.total_orders}</TableCell>
-                        <TableCell>{formatCurrency(customer.total_spent)}</TableCell>
+                        <TableCell>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              customer.status === "active"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {customer.status === "active" ? "Ativo" : "Inativo"}
+                          </span>
+                        </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => router.push(`/clientes/${customer.id}`)}>
+                          <div className="flex justify-end space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => router.push(`/clientes/visualizar/${customer.id}`)}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(customer)}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => router.push(`/clientes/editar/${customer.id}`)}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleOpenDeleteDialog(customer)}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setCurrentCustomer(customer)
+                                setIsDeleteDialogOpen(true)
+                              }}
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -283,104 +260,41 @@ export default function CustomersPage() {
             )}
           </CardContent>
         </Card>
-      </div>
 
-      {/* Dialog para adicionar/editar cliente */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>{currentCustomer ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
-            <DialogDescription>
-              {currentCustomer ? "Edite os detalhes do cliente abaixo" : "Preencha os detalhes do novo cliente"}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nome Completo</Label>
-                  <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input id="phone" name="phone" value={formData.phone} onChange={handleInputChange} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address">Endereço</Label>
-                <Input id="address" name="address" value={formData.address} onChange={handleInputChange} required />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="city">Cidade</Label>
-                  <Input id="city" name="city" value={formData.city} onChange={handleInputChange} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="state">Estado</Label>
-                  <Input id="state" name="state" value={formData.state} onChange={handleInputChange} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="postal_code">CEP</Label>
-                  <Input
-                    id="postal_code"
-                    name="postal_code"
-                    value={formData.postal_code}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Excluir Cliente</DialogTitle>
+              <DialogDescription>
+                Tem certeza que deseja excluir o cliente{" "}
+                <span className="font-medium">{currentCustomer?.name}</span>? Esta ação não pode ser
+                desfeita.
+              </DialogDescription>
+            </DialogHeader>
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsDialogOpen(false)
-                  resetForm()
-                }}
-              >
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Salvando..." : "Salvar"}
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (currentCustomer) {
+                    // Simulação de exclusão
+                    setCustomers((prev) => prev.filter((c) => c.id !== currentCustomer.id))
+                    setIsDeleteDialogOpen(false)
+                    toast({
+                      title: "Cliente excluído",
+                      description: `O cliente ${currentCustomer.name} foi excluído com sucesso.`,
+                    })
+                  }
+                }}
+              >
+                Excluir
               </Button>
             </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog para confirmar exclusão */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Confirmar Exclusão</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir o cliente "{currentCustomer?.name}"? Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button type="button" variant="destructive" onClick={handleDelete} disabled={isLoading}>
-              {isLoading ? "Excluindo..." : "Excluir"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      </div>
     </MainLayout>
   )
 }
-

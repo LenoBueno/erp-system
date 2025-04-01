@@ -1,0 +1,11 @@
+// Arquivo de índice para exportar todos os componentes administrativos
+export { DashboardWidget } from './dashboard-widget'
+export { ActivityLog } from './activity-log'
+export { SystemHealth } from './system-health'
+export { BackupControl } from './backup-control'
+export { SecurityAudit } from './security-audit'
+export { SessionMonitor } from './session-monitor'
+export { IntegrationHub } from './integration-hub'
+export { AdvancedReports } from './advanced-reports'
+export { FiscalCompliance } from './fiscal-compliance'
+export { SystemInfo } from './system-info'

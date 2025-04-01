@@ -139,7 +139,6 @@ export function Sidebar() {
       path: "/vendas",
       subItems: [
         { title: "Pedidos", path: "/vendas/pedidos" },
-        { title: "Orçamentos", path: "/vendas/orcamentos" },
         { title: "PDV", path: "/vendas/pdv" },
       ],
     },
