@@ -1,8 +1,8 @@
-let userConfig = undefined
+let userConfig = undefined;
 try {
-  userConfig = await import('./v0-user-next.config')
+  userConfig = await import('./v0-user-next.config');
 } catch (e) {
-  // ignore error
+  // ignore error if userConfig is not found
 }
 
 /** @type {import('next').NextConfig} */
@@ -27,13 +27,7 @@ const nextConfig = {
   swcMinify: true,
   reactStrictMode: true,
   poweredByHeader: false,
-  optimizeFonts: {
-    enabled: true,
-    options: {
-      removeCommentedFontFaces: true,
-      fontDisplay: 'swap',
-    },
-  },
+  optimizeFonts: true, // Simplificado para um booleano
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
@@ -47,13 +41,14 @@ const nextConfig = {
     };
     return config;
   },
-}
+};
 
-mergeConfig(nextConfig, userConfig)
+// Removendo a tentativa de importar userConfig
+// mergeConfig(nextConfig, userConfig);
 
 function mergeConfig(nextConfig, userConfig) {
   if (!userConfig) {
-    return
+    return;
   }
 
   for (const key in userConfig) {
@@ -64,11 +59,11 @@ function mergeConfig(nextConfig, userConfig) {
       nextConfig[key] = {
         ...nextConfig[key],
         ...userConfig[key],
-      }
+      };
     } else {
-      nextConfig[key] = userConfig[key]
+      nextConfig[key] = userConfig[key];
     }
   }
 }
 
-export default nextConfig
+export default nextConfig;

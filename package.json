@@ -47,39 +47,29 @@
     "i18next-http-backend": "^2.2.1",
     "json-server": "^0.17.4",
     "jsonwebtoken": "^9.0.2",
-<<<<<<< HEAD
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
     "lucide-react": "^0.454.0",
     "mysql2": "^3.14.0",
     "next": "^14.1.0",
-=======
-    "lucide-react": "^0.415.0",
-    "next": "14.1.0",
     "next-auth": "^4.24.5",
     "next-intl": "^2.16.1",
->>>>>>> 54694604715e23933498cfb7052d0e3deaaa7309
     "next-themes": "^0.2.1",
     "nextjs-toploader": "^2.0.2",
     "postcss": "^8.4.35",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.49.3",
-<<<<<<< HEAD
     "react-hot-toast": "^2.5.2",
     "react-resizable-panels": "^2.1.7",
     "recharts": "^2.12.0",
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
-=======
-    "react-hot-toast": "^2.4.1",
     "react-icons": "^4.12.0",
     "react-intersection-observer": "^9.7.0",
     "react-query": "^3.39.3",
     "react-router-dom": "^7.4.1",
-    "tailwind-merge": "^2.2.1",
     "tailwindcss": "^3.4.1",
->>>>>>> 54694604715e23933498cfb7052d0e3deaaa7309
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.22.4"
   },
