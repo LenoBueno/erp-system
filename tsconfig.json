@@ -33,6 +33,10 @@
       "@/*": [
         "./src/*"
       ],
+      "@/components/*": [
+        "./components/*",
+        "./src/components/*"
+      ],
       "@features/*": [
         "./src/features/*"
       ],
@@ -43,6 +47,7 @@
         "./src/utils/*"
       ],
       "@hooks/*": [
+        "./hooks/*",
         "./src/hooks/*"
       ],
       "@types/*": [
@@ -55,6 +60,7 @@
         "./src/config/*"
       ],
       "@lib/*": [
+        "./lib/*",
         "./src/lib/*"
       ]
     },

@@ -15,6 +15,7 @@ import {
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/hooks/use-theme"
+import { useTheme as useNextTheme } from "next-themes"
 
 interface Notification {
   id: number
@@ -30,6 +31,7 @@ export function Header() {
   const router = useRouter()
   const { toast } = useToast()
   const { isDarkMode, toggleTheme } = useTheme()
+  const { theme, setTheme } = useNextTheme()
 
   useEffect(() => {
     // Carregar notificações do usuário
@@ -116,6 +118,17 @@ export function Header() {
 
       <div className="flex items-center space-x-4">
         {/* Usuário */}
+        <div className="mr-4 flex items-center gap-2">
+          <select
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+            className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+          >
+            <option value="light">Claro</option>
+            <option value="dark">Escuro</option>
+            <option value="e-ink">E-ink</option>
+          </select>
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">

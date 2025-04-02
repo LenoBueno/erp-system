@@ -67,5 +67,67 @@
     --input: 240 5% 23%;
     --ring: 0 0% 83.9%;
   }
+  
+  /* Tema E-ink - Alto contraste e otimizado para displays e-ink */
+  .e-ink {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 0%;
+    
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+    
+    --accent: 0 0% 85%;
+    --accent-foreground: 0 0% 0%;
+    
+    --destructive: 0 0% 0%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 0 0% 0%;
+    --input: 0 0% 80%;
+    --ring: 0 0% 0%;
+  }
+}
+
+/* Estilos específicos para tema e-ink */
+.e-ink * {
+  font-weight: bold !important;
+  text-shadow: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+.e-ink svg {
+  stroke-width: 2px !important;
+  fill: currentColor !important;
+}
+
+.e-ink button, 
+.e-ink a, 
+.e-ink input,
+.e-ink select {
+  border: 1px solid black !important;
+}
+
+/* Remove todas as sombras no modo e-ink */
+.e-ink * {
+  box-shadow: none !important;
+}
+
+/* Aumenta o contraste de bordas e textos */
+.e-ink table th,
+.e-ink table td {
+  border: 1px solid black !important;
 }
 

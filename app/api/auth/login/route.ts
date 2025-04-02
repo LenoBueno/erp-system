@@ -6,20 +6,51 @@ import { env } from "@/lib/env"
 
 export async function POST(request: Request) {
   try {
-    // Validate database connection first
-    try {
-      await db.query('SELECT 1');
-    } catch (dbError) {
-      console.error('Database connection error:', dbError);
-      return NextResponse.json({ message: "Erro de conexão com o banco de dados", error: "Database connection failed" }, { status: 503 });
-    }
-
     // Pegar email e senha do corpo da requisição
     const { email, password } = await request.json()
 
     // Validar dados de entrada
     if (!email || !password) {
       return NextResponse.json({ message: "Email e senha são obrigatórios" }, { status: 400 })
+    }
+
+    // Em ambiente de desenvolvimento, permitir qualquer login para fins de teste
+    if (env.NODE_ENV === "development") {
+      // Gerar o token JWT com dados de usuário fake
+      const token = jwt.sign(
+        {
+          id: 1,
+          email: email,
+          name: "Usuário Teste",
+          role: "admin",
+        },
+        env.JWT_SECRET,
+        { expiresIn: "8h" }
+      )
+
+      // Criar a resposta JSON
+      const res = NextResponse.json({
+        message: "Login realizado com sucesso",
+        user: { 
+          id: 1,
+          email: email,
+          name: "Usuário Teste",
+          role: "admin"
+        },
+      })
+
+      // Adicionar o cookie JWT
+      res.headers.set('Set-Cookie', `auth_token=${token}; Path=/; HttpOnly; Max-Age=${60 * 60 * 8}; SameSite=Lax`)
+
+      return res
+    }
+
+    // Validate database connection first
+    try {
+      await db.query('SELECT 1');
+    } catch (dbError) {
+      console.error('Database connection error:', dbError);
+      return NextResponse.json({ message: "Erro de conexão com o banco de dados", error: "Database connection failed" }, { status: 503 });
     }
 
     // Buscar usuário no banco de dados
@@ -98,7 +129,10 @@ export async function POST(request: Request) {
     // Tratamento de erro detalhado
     console.error("Erro ao fazer login:", error);
     
-    if (error.code === 'ECONNREFUSED' || error.code === 'PROTOCOL_CONNECTION_LOST') {
+    // Converte o erro para o tipo Error para garantir acesso seguro às propriedades
+    const err = error as any;
+    
+    if (err.code === 'ECONNREFUSED' || err.code === 'PROTOCOL_CONNECTION_LOST') {
       return NextResponse.json({ message: "Erro de conexão com o banco de dados", error: "Database connection failed" }, { status: 503 });
     }
     
@@ -108,7 +142,7 @@ export async function POST(request: Request) {
     
     return NextResponse.json({ 
       message: "Erro interno do servidor", 
-      error: process.env.NODE_ENV === 'development' ? error.message : "Internal server error" 
+      error: process.env.NODE_ENV === 'development' ? (err.message || "Erro desconhecido") : "Internal server error" 
     }, { status: 500 })
   }
 }

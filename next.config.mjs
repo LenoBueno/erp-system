@@ -1,9 +1,10 @@
 let userConfig = undefined;
-try {
-  userConfig = await import('./v0-user-next.config');
-} catch (e) {
-  // ignore error if userConfig is not found
-}
+// Remover a tentativa de importação que causa o erro
+// try {
+//   userConfig = await import('./v0-user-next.config');
+// } catch (e) {
+//   // ignore error if userConfig is not found
+// }
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -20,18 +21,27 @@ const nextConfig = {
     minimumCacheTTL: 60,
     formats: ['image/webp', 'image/avif'],
     path: '/_next/image',
-    loader: 'default',
-    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
   },
   compress: true,
   swcMinify: true,
   reactStrictMode: true,
   poweredByHeader: false,
-  optimizeFonts: true, // Simplificado para um booleano
+  optimizeFonts: true,
   experimental: {
-    webpackBuildWorker: true,
-    parallelServerBuildTraces: true,
-    parallelServerCompiles: true,
+    serverComponentsExternalPackages: ['mysql2'],
+    turbo: {
+      loaders: {
+        '.js': ['eslint-loader'],
+        '.ts': ['eslint-loader'],
+        '.tsx': ['eslint-loader'],
+      },
+    },
   },
   webpack: (config) => {
     config.optimization.splitChunks = {

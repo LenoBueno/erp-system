@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "../components/theme-provider";
 
 export const metadata: Metadata = {
   title: 'Sistema ERP',
@@ -15,8 +15,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className="bg-background text-foreground light">
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+      <body className="bg-background text-foreground">
+        <ThemeProvider>
           {children}
         </ThemeProvider>
       </body>

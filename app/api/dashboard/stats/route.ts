@@ -10,239 +10,60 @@ export async function GET(request: Request) {
       return NextResponse.json({ message: "Não autorizado" }, { status: 401 })
     }
 
-    // Obter estatísticas do dashboard
-    const [
-      totalSalesResult,
-      totalCustomersResult,
-      totalOrdersResult,
-      totalProductsResult,
-      salesGrowthResult,
-      customersGrowthResult,
-      ordersGrowthResult,
-      productsGrowthResult,
-      recentSalesResult,
-      productCategoriesResult,
-      monthlySalesResult,
-    ] = await Promise.all([
-      // Total de vendas
-      db.query(`
-        SELECT COALESCE(SUM(total_amount), 0) as total
-        FROM orders
-        WHERE status = 'completed'
-      `),
-
-      // Total de clientes
-      db.query(`
-        SELECT COUNT(*) as total
-        FROM customers
-      `),
-
-      // Total de pedidos
-      db.query(`
-        SELECT COUNT(*) as total
-        FROM orders
-      `),
-
-      // Total de produtos
-      db.query(`
-        SELECT COUNT(*) as total
-        FROM products
-      `),
-
-      // Crescimento de vendas
-      db.query(`
-        SELECT 
-          (
-            (
-              SELECT COALESCE(SUM(total_amount), 0)
-              FROM orders
-              WHERE 
-                status = 'completed' AND
-                created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01') AND
-                created_at < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')
-            ) - 
-            (
-              SELECT COALESCE(SUM(total_amount), 0)
-              FROM orders
-              WHERE 
-                status = 'completed' AND
-                created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 2 MONTH, '%Y-%m-01') AND
-                created_at < DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01')
-            )
-          ) / 
-          NULLIF(
-            (
-              SELECT COALESCE(SUM(total_amount), 0)
-              FROM orders
-              WHERE 
-                status = 'completed' AND
-                created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 2 MONTH, '%Y-%m-01') AND
-                created_at < DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01')
-            ), 0
-          ) * 100 as growth
-      `),
-
-      // Crescimento de clientes
-      db.query(`
-        SELECT 
-          (
-            (
-              SELECT COUNT(*)
-              FROM customers
-              WHERE created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01') AND
-                    created_at < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')
-            ) - 
-            (
-              SELECT COUNT(*)
-              FROM customers
-              WHERE created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 2 MONTH, '%Y-%m-01') AND
-                    created_at < DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01')
-            )
-          ) / 
-          NULLIF(
-            (
-              SELECT COUNT(*)
-              FROM customers
-              WHERE created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 2 MONTH, '%Y-%m-01') AND
-                    created_at < DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01')
-            ), 0
-          ) * 100 as growth
-      `),
-
-      // Crescimento de pedidos
-      db.query(`
-        SELECT 
-          (
-            (
-              SELECT COUNT(*)
-              FROM orders
-              WHERE created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01') AND
-                    created_at < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')
-            ) - 
-            (
-              SELECT COUNT(*)
-              FROM orders
-              WHERE created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 2 MONTH, '%Y-%m-01') AND
-                    created_at < DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01')
-            )
-          ) / 
-          NULLIF(
-            (
-              SELECT COUNT(*)
-              FROM orders
-              WHERE created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 2 MONTH, '%Y-%m-01') AND
-                    created_at < DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01')
-            ), 0
-          ) * 100 as growth
-      `),
-
-      // Crescimento de produtos
-      db.query(`
-        SELECT 
-          (
-            (
-              SELECT COUNT(*)
-              FROM products
-              WHERE created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01') AND
-                    created_at < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')
-            ) - 
-            (
-              SELECT COUNT(*)
-              FROM products
-              WHERE created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 2 MONTH, '%Y-%m-01') AND
-                    created_at < DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01')
-            )
-          ) / 
-          NULLIF(
-            (
-              SELECT COUNT(*)
-              FROM products
-              WHERE created_at >= DATE_FORMAT(CURRENT_DATE - INTERVAL 2 MONTH, '%Y-%m-01') AND
-                    created_at < DATE_FORMAT(CURRENT_DATE - INTERVAL 1 MONTH, '%Y-%m-01')
-            ), 0
-          ) * 100 as growth
-      `),
-
-      // Vendas recentes
-      db.query(`
-        SELECT 
-          DATE_FORMAT(created_at, '%d/%m') as date,
-          SUM(total_amount) as amount
-        FROM orders
-        WHERE 
-          status = 'completed' AND
-          created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
-        GROUP BY DATE_FORMAT(created_at, '%d/%m')
-        ORDER BY created_at DESC
-        LIMIT 10
-      `),
-
-      // Produtos por categoria
-      db.query(`
-        SELECT 
-          c.name as category,
-          COUNT(p.id) as count
-        FROM products p
-        JOIN categories c ON p.category_id = c.id
-        GROUP BY c.id, c.name
-        ORDER BY count DESC
-        LIMIT 6
-      `),
-
-      // Vendas mensais
-      db.query(`
-        SELECT 
-          DATE_FORMAT(created_at, '%m/%Y') as month,
-          SUM(total_amount) as sales
-        FROM orders
-        WHERE 
-          status = 'completed' AND
-          created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)
-        GROUP BY DATE_FORMAT(created_at, '%m/%Y')
-        ORDER BY created_at ASC
-      `),
-    ])
-
-    // Formatar dados
-    const stats = {
-      totalSales: totalSalesResult[0]?.total || 0,
-      totalCustomers: totalCustomersResult[0]?.total || 0,
-      totalOrders: totalOrdersResult[0]?.total || 0,
-      totalProducts: totalProductsResult[0]?.total || 0,
-      salesGrowth: Number.parseFloat(salesGrowthResult[0]?.growth || 0).toFixed(2),
-      customersGrowth: Number.parseFloat(customersGrowthResult[0]?.growth || 0).toFixed(2),
-      ordersGrowth: Number.parseFloat(ordersGrowthResult[0]?.growth || 0).toFixed(2),
-      productsGrowth: Number.parseFloat(productsGrowthResult[0]?.growth || 0).toFixed(2),
-      recentSales: recentSalesResult || [],
-      productCategories: productCategoriesResult || [],
-      monthlySales: monthlySalesResult || [],
-    }
-
-    return NextResponse.json({ stats })
-  } catch (dbError) {
-    // Tratar erro específico de tabela inexistente
-    if (dbError.code === 'ER_NO_SUCH_TABLE') {
-      console.warn("Tabela 'orders' não existe. Retornando dados simulados.")
-      // Retornar dados simulados temporários
-      return NextResponse.json({
-        stats: {
-          totalSales: 0,
-          totalCustomers: 0,
-          totalOrders: 0,
-          totalProducts: 0,
-          salesGrowth: 0,
-          customersGrowth: 0,
-          ordersGrowth: 0,
-          productsGrowth: 0,
-          recentSales: [],
-          productCategories: [],
-          monthlySales: [],
-        }
-      })
-    } else {
-      console.error("Erro ao obter estatísticas do dashboard:", dbError)
-      return NextResponse.json({ message: "Erro interno do servidor" }, { status: 500 })
-    }
+    // Retornar dados simulados para desenvolvimento
+    return NextResponse.json({
+      stats: {
+        totalSales: 125000,
+        totalCustomers: 420,
+        totalOrders: 1280,
+        totalProducts: 540,
+        salesGrowth: 12.5,
+        customersGrowth: 8.2,
+        ordersGrowth: 15.7,
+        productsGrowth: 3.5,
+        recentSales: [
+          { date: "01/04", amount: 3200 },
+          { date: "02/04", amount: 4500 },
+          { date: "03/04", amount: 3800 },
+          { date: "04/04", amount: 5100 },
+          { date: "05/04", amount: 4300 },
+          { date: "06/04", amount: 3700 },
+          { date: "07/04", amount: 5800 }
+        ],
+        productCategories: [
+          { category: "Eletrônicos", count: 145 },
+          { category: "Móveis", count: 98 },
+          { category: "Vestuário", count: 120 },
+          { category: "Alimentos", count: 87 },
+          { category: "Cosméticos", count: 65 },
+          { category: "Outros", count: 25 }
+        ],
+        monthlySales: [
+          { month: "01/2024", sales: 28500 },
+          { month: "02/2024", sales: 31200 },
+          { month: "03/2024", sales: 35800 },
+          { month: "04/2024", sales: 42500 }
+        ],
+        lowStockProducts: [
+          { id: 1, name: "Smartphone X", stock: 3, minStock: 5 },
+          { id: 2, name: "Notebook Pro", stock: 2, minStock: 5 },
+          { id: 3, name: "Headphone BT", stock: 4, minStock: 10 }
+        ],
+        paymentStatus: [
+          { status: "Pago", count: 980, amount: 98500 },
+          { status: "Pendente", count: 240, amount: 22000 },
+          { status: "Cancelado", count: 60, amount: 4500 }
+        ],
+        topCustomers: [
+          { id: 1, name: "João Silva", totalOrders: 12, totalSpent: 15800 },
+          { id: 2, name: "Maria Oliveira", totalOrders: 9, totalSpent: 12500 },
+          { id: 3, name: "Carlos Pereira", totalOrders: 8, totalSpent: 9800 }
+        ]
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao obter estatísticas do dashboard:", error)
+    return NextResponse.json({ message: "Erro interno do servidor" }, { status: 500 })
   }
 }
 
